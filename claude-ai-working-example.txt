@@ -1,3 +1,5 @@
+1-Task
+
 Role: Senior frontend engineer + UI/UX designer
 
 Context:
@@ -120,3 +122,86 @@ Important:
 Act like a senior frontend engineer from a top tech company.
 Avoid beginner mistakes.
 Write scalable and maintainable code.
+
+2-Task
+Role: Senior frontend engineer
+
+Task:
+Build a product image upload component for admin panel
+
+Tech Stack:
+- Next.js 14 (App Router)
+- TypeScript
+- Tailwind CSS
+- React Hook Form
+- Axios
+- React Query
+
+Requirements:
+
+Upload:
+- Allow selecting multiple images
+- Validate each image:
+  - Max size: 3MB
+  - Allowed types: jpg, jpeg, png
+
+UI:
+- Show image preview before upload
+- Show remove button for each image
+- Show upload progress (progress bar)
+- Show error messages
+
+API Integration:
+Use this endpoint:
+/**
+     * POST /api/product-images/upload/{productId}
+     * Content-Type: multipart/form-data
+     *
+     * Form fields:
+     *   files       — one or more image files (jpg/jpeg/png, max 3MB each)
+     *   firstIsMain — optional boolean; if true, the first file becomes the main image (default: true)
+     */
+    @PostMapping(value = "/upload/{productId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(summary = "Upload images for a product (jpg/jpeg/png, max 3MB each)")
+    public ResponseEntity<ApiResponse<List<ProductImageResponse>>> uploadImages(
+            @PathVariable Long productId,
+            @RequestParam("files") List<MultipartFile> files,
+            @RequestParam(value = "firstIsMain", defaultValue = "true") boolean firstIsMain) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Images uploaded",
+                        productImageService.uploadImages(productId, files, firstIsMain)));
+    }
+
+Request:
+- multipart/form-data
+- files: array of images
+
+Logic:
+- Create FormData
+- Append multiple files
+- Send via axios
+- Show loading state
+- Handle success & error
+
+State:
+- Manage selected files
+- Manage upload progress
+- Manage errors
+
+UX:
+- Drag & drop support (optional)
+- Disable upload if no files
+- Show success toast
+
+Output:
+- Upload component
+- API service function
+- Example usage in Product page
+
+Important:
+- Clean and reusable code
+- Use TypeScript properly
+- Follow best practices
+- Make it production-ready

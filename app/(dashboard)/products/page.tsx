@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Search, Plus, MoreHorizontal, Pencil, Trash2, Star, Package } from "lucide-react";
+import { Search, Plus, MoreHorizontal, Pencil, Trash2, Star, Package, ImagePlus } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { ProductImageUpload } from "@/components/products/product-image-upload";
 import { PageHeader } from "@/components/shared/page-header";
 import { DataTablePagination } from "@/components/shared/data-table-pagination";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
@@ -60,6 +61,7 @@ export default function ProductsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
+  const [imageUploadProduct, setImageUploadProduct] = useState<Product | null>(null);
 
   const { data, isLoading } = useProducts({
     search: debouncedSearch || undefined,
@@ -238,6 +240,10 @@ export default function ProductsPage() {
                                 <Pencil className="h-4 w-4" />
                                 Edit
                               </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => setImageUploadProduct(product)}>
+                                <ImagePlus className="h-4 w-4" />
+                                Upload Images
+                              </DropdownMenuItem>
                               <DropdownMenuItem
                                 className="text-destructive focus:text-destructive"
                                 onClick={() => setDeleteTarget(product)}
@@ -361,6 +367,18 @@ export default function ProductsPage() {
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Image Upload Dialog */}
+      <Dialog open={!!imageUploadProduct} onOpenChange={(open) => !open && setImageUploadProduct(null)}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Upload Images — {imageUploadProduct?.name}</DialogTitle>
+          </DialogHeader>
+          {imageUploadProduct && (
+            <ProductImageUpload productId={imageUploadProduct.id} />
+          )}
         </DialogContent>
       </Dialog>
 
