@@ -300,3 +300,122 @@ Also:
 - Show image preview as thumbnail
 - Limit to 1 image only
 - Show file size warning
+
+4-Task
+Role: Senior frontend engineer
+
+Task:
+Build Poster (banner) upload UI for admin panel
+
+Tech Stack:
+- Next.js 14 (App Router)
+- TypeScript
+- Tailwind CSS
+- React Hook Form
+- Zod validation
+- Axios
+- React Query
+
+API:
+POST /api/posters
+
+# Create poster
+curl -X POST http://localhost:8080/api/posters \
+  -H "Authorization: Bearer <token>" \
+  -F "image=@banner.jpg" \
+  -F "link=https://example.com"
+
+# Update poster — replace image only
+curl -X PUT http://localhost:8080/api/posters/3 \
+  -H "Authorization: Bearer <token>" \
+  -F "image=@new-banner.jpg"
+### GET /api/posters
+Get all active posters. **Public**
+
+**Response `200`:**
+```json
+{
+  "success": true,
+  "data": {
+    "content": [
+      {
+        "id": 1,
+        "imageLink": "https://cdn.example.com/banner1.jpg",
+        "clickQuantity": 1245,
+        "link": "https://example.com/sale",
+        "createdAt": "2024-01-01T00:00:00"
+      }
+    ]
+  }
+}
+```
+
+### POST /api/posters/{id}/click
+Track a poster click (increment counter). **Public**
+
+### PUT /api/posters/{id} *(ADMIN)*
+### DELETE /api/posters/{id} *(ADMIN)*
+
+Request:
+multipart/form-data
+- image: file
+- link: string (optional)
+
+Requirements:
+
+Pages
+- Poster Page
+
+Form:
+- Input: image upload
+- Input: link (optional)
+
+Validation:
+- Max file size: 3MB
+- Allowed types: jpg, jpeg, png
+
+UI:
+- Modern material design
+- Drag & drop upload area
+- Show image preview
+- Maintain 16:9 preview box
+- Show warning if image not 16:9
+- Show remove image button
+- Loading state
+- Success toast
+
+Preview:
+- Display image inside 16:9 container
+- Use object-fit: cover
+
+Upload Logic:
+- Use FormData
+- Append image + link
+- Send via axios
+- Handle loading & error
+
+UX:
+- Disable submit if no image
+- Show upload progress
+- Show error messages
+
+Architecture:
+- Separate component (PosterUpload)
+- Reusable file input
+- Clean code
+
+Output:
+- PosterUpload component
+- Form logic
+- API service
+- Preview UI
+- Clean production-ready code
+
+Important:
+- Use best practices
+- Avoid beginner mistakes
+- Make UI clean and responsive
+Also:
+- Use react-dropzone for drag & drop
+- Add image crop (16:9) using react-easy-crop
+- Show aspect ratio overlay (16:9 grid)
