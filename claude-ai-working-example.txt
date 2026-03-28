@@ -1,0 +1,122 @@
+Role: Senior frontend engineer + UI/UX designer
+
+Context:
+We are building a modern admin dashboard for an e-commerce system.
+Frontend must integrate with an existing backend API.
+
+Tech Stack:
+- Next.js 14 (App Router)
+- TypeScript
+- Tailwind CSS
+- Shadcn/ui (for modern components)
+- React Query (TanStack Query)
+- Axios (API client)
+- Zustand (state management)
+- React Hook Form + Zod (validation)
+- Framer Motion (animations)
+
+Design Requirements:
+- Modern Material-style UI
+- Clean, minimal, professional look
+- Dark mode support
+- Responsive (mobile + desktop)
+
+Layout:
+- Sidebar (left, fixed)
+- Top navbar (search, notifications, user menu)
+- Main content area
+
+Pages:
+
+1. Login Page:
+- Email + password form
+- JWT authentication
+- Store tokens (access + refresh)
+- Redirect after login
+
+2. Dashboard:
+- Statistics cards:
+  - total users
+  - total orders
+  - total revenue
+- Recent orders
+- Notifications
+
+3. Users Page:
+- Table with pagination
+- Search + filter
+- Block/unblock user
+- Change role
+
+4. Products Page:
+- Table/grid view
+- Add/Edit/Delete product
+- Image preview
+
+5. Orders Page:
+- Orders list
+- Status update (PENDING → DELIVERED)
+- Filter by status
+
+6. Categories & Companies:
+- CRUD operations
+
+7. Cart (optional view for admin debugging)
+
+8. Comments / Reviews:
+- List + delete
+
+9. Notifications:
+- List + mark as read
+
+10. Admin Management:
+- Create admin user
+- Assign roles
+
+API Integration:
+Use the provided API documentation:
+API_DOCS.md file 
+Requirements:
+- Create reusable API service (axios instance)
+- Add JWT interceptor (attach token automatically)
+- Handle refresh token logic
+- Handle errors globally
+- Use React Query for fetching/mutations
+
+Architecture:
+- Feature-based folder structure
+- Separate components, hooks, services
+- Custom hooks (useUsers, useProducts, etc.)
+Accessibility:
+- Keyboard navigation
+- Proper contrast
+- ARIA labels
+
+Components:
+- Sidebar (navigation)
+- Navbar
+- DataTable (reusable)
+- Modal (add/edit)
+- Form components
+- Toast notifications
+- Loading skeletons
+
+Performance:
+- Lazy loading
+- Code splitting
+- Optimized rendering
+
+Output:
+- Full project structure
+- Layout (sidebar + navbar)
+- Login page
+- Dashboard page
+- Example API integration (axios + react query)
+- Example pages (Users, Products)
+- Reusable components
+- Clean production-ready code
+
+Important:
+Act like a senior frontend engineer from a top tech company.
+Avoid beginner mistakes.
+Write scalable and maintainable code.
