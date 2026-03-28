@@ -87,7 +87,8 @@ export interface Category {
 
 export interface CategoryRequest {
   name: string;
-  imageLink: string;
+  /** New image file to upload. Omit to keep the existing image. */
+  image?: File;
 }
 
 // ─── Company ─────────────────────────────────────────────────────────────────
@@ -100,7 +101,8 @@ export interface Company {
 
 export interface CompanyRequest {
   name: string;
-  imageLink: string;
+  /** Image is optional for companies. Omit to keep the existing image. */
+  image?: File;
 }
 
 // ─── Product ─────────────────────────────────────────────────────────────────

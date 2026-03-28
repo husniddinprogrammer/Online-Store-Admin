@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import { PageHeader } from "@/components/shared/page-header";
 import { DataTablePagination } from "@/components/shared/data-table-pagination";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { ImagePicker } from "@/components/shared/image-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,7 +29,6 @@ import type { Category } from "@/types";
 
 const categorySchema = z.object({
   name: z.string().min(1, "Name is required"),
-  imageLink: z.string().url("Must be a valid URL"),
 });
 type CategoryFormData = z.infer<typeof categorySchema>;
 
@@ -38,6 +38,8 @@ export default function CategoriesPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<Category | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageError, setImageError] = useState<string | undefined>();
 
   const { data, isLoading } = useCategories({ page, size: pageSize });
   const createCategory = useCreateCategory();
@@ -50,21 +52,32 @@ export default function CategoriesPage() {
 
   const openCreate = () => {
     setEditingItem(null);
-    reset({ name: "", imageLink: "" });
+    setImageFile(null);
+    setImageError(undefined);
+    reset({ name: "" });
     setDialogOpen(true);
   };
 
   const openEdit = (item: Category) => {
     setEditingItem(item);
-    reset({ name: item.name, imageLink: item.imageLink });
+    setImageFile(null);
+    setImageError(undefined);
+    reset({ name: item.name });
     setDialogOpen(true);
   };
 
-  const onSubmit = async (data: CategoryFormData) => {
+  const onSubmit = async (formData: CategoryFormData) => {
+    // Image required when creating
+    if (!editingItem && !imageFile) {
+      setImageError("Image is required");
+      return;
+    }
+    setImageError(undefined);
+
     if (editingItem) {
-      await updateCategory.mutateAsync({ id: editingItem.id, body: data });
+      await updateCategory.mutateAsync({ id: editingItem.id, body: { name: formData.name, image: imageFile ?? undefined } });
     } else {
-      await createCategory.mutateAsync(data);
+      await createCategory.mutateAsync({ name: formData.name, image: imageFile! });
     }
     setDialogOpen(false);
   };
@@ -83,9 +96,8 @@ export default function CategoriesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Image</TableHead>
+                <TableHead className="w-16">Image</TableHead>
                 <TableHead>Name</TableHead>
-                <TableHead>Image URL</TableHead>
                 <TableHead className="w-24">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -93,7 +105,7 @@ export default function CategoriesPage() {
               {isLoading
                 ? Array.from({ length: 8 }).map((_, i) => (
                     <TableRow key={i}>
-                      {Array.from({ length: 4 }).map((_, j) => (
+                      {Array.from({ length: 3 }).map((_, j) => (
                         <TableCell key={j}><Skeleton className="h-8 w-full" /></TableCell>
                       ))}
                     </TableRow>
@@ -118,9 +130,6 @@ export default function CategoriesPage() {
                         </div>
                       </TableCell>
                       <TableCell className="font-medium">{item.name}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground max-w-xs truncate">
-                        {item.imageLink}
-                      </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
                           <Button variant="ghost" size="icon-sm" onClick={() => openEdit(item)}>
@@ -156,7 +165,7 @@ export default function CategoriesPage() {
         )}
       </Card>
 
-      {/* Dialog */}
+      {/* Create / Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
@@ -164,15 +173,25 @@ export default function CategoriesPage() {
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="name">Name</Label>
-              <Input id="name" {...register("name")} />
+              <Label htmlFor="cat-name">Name</Label>
+              <Input id="cat-name" {...register("name")} />
               {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
             </div>
+
             <div className="space-y-1.5">
-              <Label htmlFor="imageLink">Image URL</Label>
-              <Input id="imageLink" {...register("imageLink")} placeholder="https://..." />
-              {errors.imageLink && <p className="text-xs text-destructive">{errors.imageLink.message}</p>}
+              <Label>
+                Image
+                {!editingItem && <span className="text-destructive ml-0.5">*</span>}
+                {editingItem && <span className="ml-1 text-xs text-muted-foreground">(leave empty to keep current)</span>}
+              </Label>
+              <ImagePicker
+                value={imageFile}
+                onChange={(f) => { setImageFile(f); if (f) setImageError(undefined); }}
+                existingUrl={editingItem?.imageLink}
+                error={imageError}
+              />
             </div>
+
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
               <Button type="submit" disabled={isSubmitting}>

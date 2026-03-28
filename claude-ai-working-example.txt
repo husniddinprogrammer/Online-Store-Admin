@@ -205,3 +205,98 @@ Important:
 - Use TypeScript properly
 - Follow best practices
 - Make it production-ready
+3-TASK
+Role: Senior frontend engineer
+
+Task:
+Build Category and Company create forms with image upload
+
+Tech Stack:
+- Next.js 14 (App Router)
+- TypeScript
+- Tailwind CSS
+- React Hook Form
+- Zod validation
+- Axios
+- React Query
+
+Context:
+Backend now accepts image file instead of imageLink.
+
+API:
+POST /api/categories
+POST /api/companies
+# Create category
+curl -X POST http://localhost:8080/api/categories \
+  -H "Authorization: Bearer <token>" \
+  -F 'data={"name":"Electronics"};type=application/json' \
+  -F "image=@logo.jpg"
+
+# Create company (no image — image is optional)
+curl -X POST http://localhost:8080/api/companies \
+  -H "Authorization: Bearer <token>" \
+  -F 'data={"name":"Samsung"};type=application/json'
+
+
+Request:
+multipart/form-data
+- name: string
+- image: file
+
+Requirements:
+
+Form:
+- Input: name
+- Input: image (file upload)
+
+Validation:
+- Required fields
+- Image max size: 3MB
+- Allowed types: jpg, jpeg, png
+
+UI:
+- Modern material design
+- Image preview before upload
+- Remove selected image button
+- Error messages
+- Loading state
+- Success toast
+
+Upload Logic:
+- Use FormData
+- Append name + image
+- Send via axios
+- DO NOT use JSON
+- Use multipart/form-data
+
+State:
+- Manage image file
+- Manage preview URL
+- Manage loading & errors
+
+UX:
+- Disable submit if invalid
+- Show upload progress (optional)
+- Show success message
+
+Architecture:
+- Separate component
+- Reusable form logic
+- Clean code
+
+Output:
+- CategoryCreate component
+- CompanyCreate component
+- API service function
+- Form validation
+- Upload logic
+
+Important:
+- Use best practices
+- Avoid beginner mistakes
+- Make it production-ready
+Also:
+- Add drag & drop support
+- Show image preview as thumbnail
+- Limit to 1 image only
+- Show file size warning

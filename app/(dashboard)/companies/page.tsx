@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import { PageHeader } from "@/components/shared/page-header";
 import { DataTablePagination } from "@/components/shared/data-table-pagination";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { ImagePicker } from "@/components/shared/image-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,7 +29,6 @@ import type { Company } from "@/types";
 
 const companySchema = z.object({
   name: z.string().min(1, "Name is required"),
-  imageLink: z.string().url("Must be a valid URL"),
 });
 type CompanyFormData = z.infer<typeof companySchema>;
 
@@ -38,6 +38,8 @@ export default function CompaniesPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<Company | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Company | null>(null);
+  // Image is optional for companies — no imageError needed
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const { data, isLoading } = useCompanies({ page, size: pageSize });
   const createCompany = useCreateCompany();
@@ -50,21 +52,23 @@ export default function CompaniesPage() {
 
   const openCreate = () => {
     setEditingItem(null);
-    reset({ name: "", imageLink: "" });
+    setImageFile(null);
+    reset({ name: "" });
     setDialogOpen(true);
   };
 
   const openEdit = (item: Company) => {
     setEditingItem(item);
-    reset({ name: item.name, imageLink: item.imageLink });
+    setImageFile(null);
+    reset({ name: item.name });
     setDialogOpen(true);
   };
 
-  const onSubmit = async (data: CompanyFormData) => {
+  const onSubmit = async (formData: CompanyFormData) => {
     if (editingItem) {
-      await updateCompany.mutateAsync({ id: editingItem.id, body: data });
+      await updateCompany.mutateAsync({ id: editingItem.id, body: { name: formData.name, image: imageFile ?? undefined } });
     } else {
-      await createCompany.mutateAsync(data);
+      await createCompany.mutateAsync({ name: formData.name, image: imageFile ?? undefined });
     }
     setDialogOpen(false);
   };
@@ -83,9 +87,8 @@ export default function CompaniesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Logo</TableHead>
+                <TableHead className="w-16">Logo</TableHead>
                 <TableHead>Name</TableHead>
-                <TableHead>Image URL</TableHead>
                 <TableHead className="w-24">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -93,7 +96,7 @@ export default function CompaniesPage() {
               {isLoading
                 ? Array.from({ length: 8 }).map((_, i) => (
                     <TableRow key={i}>
-                      {Array.from({ length: 4 }).map((_, j) => (
+                      {Array.from({ length: 3 }).map((_, j) => (
                         <TableCell key={j}><Skeleton className="h-8 w-full" /></TableCell>
                       ))}
                     </TableRow>
@@ -118,9 +121,6 @@ export default function CompaniesPage() {
                         </div>
                       </TableCell>
                       <TableCell className="font-medium">{item.name}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground max-w-xs truncate">
-                        {item.imageLink}
-                      </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
                           <Button variant="ghost" size="icon-sm" onClick={() => openEdit(item)}>
@@ -156,6 +156,7 @@ export default function CompaniesPage() {
         )}
       </Card>
 
+      {/* Create / Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
@@ -163,15 +164,23 @@ export default function CompaniesPage() {
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="name">Name</Label>
-              <Input id="name" {...register("name")} />
+              <Label htmlFor="co-name">Name</Label>
+              <Input id="co-name" {...register("name")} />
               {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
             </div>
+
             <div className="space-y-1.5">
-              <Label htmlFor="imageLink">Logo URL</Label>
-              <Input id="imageLink" {...register("imageLink")} placeholder="https://..." />
-              {errors.imageLink && <p className="text-xs text-destructive">{errors.imageLink.message}</p>}
+              <Label>
+                Logo
+                <span className="ml-1 text-xs text-muted-foreground">(optional)</span>
+              </Label>
+              <ImagePicker
+                value={imageFile}
+                onChange={setImageFile}
+                existingUrl={editingItem?.imageLink}
+              />
             </div>
+
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
               <Button type="submit" disabled={isSubmitting}>
@@ -182,6 +191,7 @@ export default function CompaniesPage() {
         </DialogContent>
       </Dialog>
 
+      {/* Delete Confirm */}
       <ConfirmDialog
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
