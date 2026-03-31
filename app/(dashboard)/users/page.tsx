@@ -110,6 +110,7 @@ export default function UsersPage() {
                 <TableHead>User</TableHead>
                 <TableHead>Role</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Balance</TableHead>
                 <TableHead className="hidden md:table-cell">Phone</TableHead>
                 <TableHead className="hidden lg:table-cell">Joined</TableHead>
                 <TableHead className="w-10" />
@@ -122,6 +123,7 @@ export default function UsersPage() {
                       <TableCell><Skeleton className="h-9 w-48" /></TableCell>
                       <TableCell><Skeleton className="h-5 w-16" /></TableCell>
                       <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                      <TableCell><Skeleton className="h-5 w-20" /></TableCell>
                       <TableCell className="hidden md:table-cell"><Skeleton className="h-5 w-28" /></TableCell>
                       <TableCell className="hidden lg:table-cell"><Skeleton className="h-5 w-28" /></TableCell>
                       <TableCell><Skeleton className="h-8 w-8" /></TableCell>
@@ -159,6 +161,9 @@ export default function UsersPage() {
                         <Badge variant={user.blocked ? "destructive" : "success"}>
                           {user.blocked ? "Blocked" : "Active"}
                         </Badge>
+                      </TableCell>
+                      <TableCell className="font-mono text-sm">
+                        {user.balance.toLocaleString()} UZS
                       </TableCell>
                       <TableCell className="hidden md:table-cell text-sm text-muted-foreground">
                         {user.phoneNumber}

@@ -12,7 +12,10 @@ export interface PaginatedResponse<T> {
   totalElements: number;
   totalPages: number;
   size: number;
-  number: number;
+  page?: number;
+  number?: number;
+  first?: boolean;
+  last?: boolean;
 }
 
 export interface ApiError {
@@ -109,8 +112,9 @@ export interface CompanyRequest {
 
 export interface ProductImage {
   id: number;
-  imageLink: string;
-  isMain: boolean;
+  imageUrl?: string;
+  imageLink?: string;
+  isMain?: boolean;
 }
 
 export interface Product {
@@ -283,12 +287,27 @@ export interface UserQueryParams extends PaginationParams {
   search?: string;
 }
 
+export type ProductSortOption =
+  | "NEWEST"
+  | "POPULAR"
+  | "PRICE_ASC"
+  | "PRICE_DESC"
+  | "DISCOUNT_DESC"
+  | "DISCOUNT_ASC"
+  | "ID_DESC"
+  | "ID_ASC"
+  | "STOCK_DESC"
+  | "STOCK_ASC"
+  | "SOLD_DESC"
+  | "SOLD_ASC";
+
 export interface ProductQueryParams extends PaginationParams {
   search?: string;
   categoryId?: number;
   companyId?: number;
   minPrice?: number;
   maxPrice?: number;
+  sort?: ProductSortOption;
 }
 
 export interface OrderQueryParams extends PaginationParams {

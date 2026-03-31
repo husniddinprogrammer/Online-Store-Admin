@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Search, Plus, MoreHorizontal, Pencil, Trash2, Star, Package, ImagePlus } from "lucide-react";
+import { Search, Plus, MoreHorizontal, Pencil, Trash2, Star, Package, ImagePlus, ChevronUp } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -37,7 +37,31 @@ import { useCategories } from "@/hooks/use-categories";
 import { useCompanies } from "@/hooks/use-companies";
 import { formatCurrency } from "@/lib/utils";
 import { useDebounce } from "@/hooks/use-debounce";
-import type { Product, ProductRequest } from "@/types";
+import { useQueryClient } from "@tanstack/react-query";
+import { productKeys } from "@/hooks/use-products";
+import type { Product, ProductRequest, ProductSortOption } from "@/types";
+
+const formatNumberWithSpacing = (value: string): string => {
+  // Remove existing spaces and non-digit characters except decimal point
+  const cleanValue = value.replace(/\s/g, '');
+  
+  // If empty, return empty
+  if (!cleanValue) return '';
+  
+  // Convert to number and back to string to remove leading zeros
+  const numValue = parseFloat(cleanValue);
+  if (isNaN(numValue)) return '';
+  
+  const numStr = numValue.toString();
+  
+  // Add space after every 3 digits from the right (standard number formatting)
+  return numStr.replace(/\B(?=(\d{3})+(?!\d))/g, ' ').trim();
+};
+
+const parseFormattedNumber = (formattedValue: string): number => {
+  // Remove spaces and convert to number
+  return parseFloat(formattedValue.replace(/\s/g, '')) || 0;
+};
 
 const productSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -46,7 +70,7 @@ const productSchema = z.object({
   stockQuantity: z.coerce.number().min(0).default(0),
   categoryId: z.coerce.number().min(1, "Category is required"),
   companyId: z.coerce.number().min(1, "Company is required"),
-  arrivalPrice: z.coerce.number().min(0).default(0),
+  arrivalPrice: z.coerce.number().min(1, "Arrival price is required"),
   sellPrice: z.coerce.number().min(1, "Sell price is required"),
 });
 
@@ -56,6 +80,11 @@ export default function ProductsPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(20);
+  const [sort, setSort] = useState<ProductSortOption>("ID_DESC");
+  const [categoryId, setCategoryId] = useState<number | null>(null);
+  const [companyId, setCompanyId] = useState<number | null>(null);
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
   const debouncedSearch = useDebounce(search, 400);
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -63,11 +92,21 @@ export default function ProductsPage() {
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [imageUploadProduct, setImageUploadProduct] = useState<Product | null>(null);
 
+  // State for formatted input values
+  const [formattedSellPrice, setFormattedSellPrice] = useState("");
+  const [formattedArrivalPrice, setFormattedArrivalPrice] = useState("");
+  const [formattedStockQuantity, setFormattedStockQuantity] = useState("");
+  const [formattedDiscountPercent, setFormattedDiscountPercent] = useState("");
+
   const { data, isLoading } = useProducts({
     search: debouncedSearch || undefined,
+    categoryId: categoryId ?? undefined,
+    companyId: companyId ?? undefined,
+    minPrice: minPrice ? Number(minPrice) : undefined,
+    maxPrice: maxPrice ? Number(maxPrice) : undefined,
     page,
     size: pageSize,
-    sort: "createdAt,desc",
+    sort,
   });
   const { data: categoriesData } = useCategories({ size: 100 });
   const { data: companiesData } = useCompanies({ size: 100 });
@@ -75,6 +114,46 @@ export default function ProductsPage() {
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
   const deleteProduct = useDeleteProduct();
+  const queryClient = useQueryClient();
+
+  const handleImageUploadComplete = () => {
+    queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+    setImageUploadProduct(null);
+  };
+
+  const handleSort = (field: "id" | "popular" | "price" | "discount" | "stock" | "sold") => {
+    setSort((prev) => {
+      if (field === "id") return prev === "ID_ASC" ? "ID_DESC" : "ID_ASC";
+      if (field === "popular") return "POPULAR";
+      if (field === "discount") return prev === "DISCOUNT_ASC" ? "DISCOUNT_DESC" : "DISCOUNT_ASC";
+      if (field === "stock") return prev === "STOCK_ASC" ? "STOCK_DESC" : "STOCK_ASC";
+      if (field === "sold") return prev === "SOLD_ASC" ? "SOLD_DESC" : "SOLD_ASC";
+
+      // price
+      if (prev === "PRICE_ASC") return "PRICE_DESC";
+      return "PRICE_ASC";
+    });
+    setPage(0);
+  };
+
+  const isSortActive = (field: "id" | "popular" | "price" | "discount" | "stock" | "sold") => {
+    if (field === "id") return sort === "ID_ASC" || sort === "ID_DESC";
+    if (field === "popular") return sort === "POPULAR";
+    if (field === "price") return sort === "PRICE_ASC" || sort === "PRICE_DESC";
+    if (field === "discount") return sort === "DISCOUNT_ASC" || sort === "DISCOUNT_DESC";
+    if (field === "stock") return sort === "STOCK_ASC" || sort === "STOCK_DESC";
+    return sort === "SOLD_ASC" || sort === "SOLD_DESC";
+  };
+
+  const isSortDesc = (field: "id" | "popular" | "price" | "discount" | "stock" | "sold") => {
+    if (field === "id") return sort === "ID_DESC";
+    if (field === "price") return sort === "PRICE_DESC";
+    if (field === "discount") return sort === "DISCOUNT_DESC";
+    if (field === "stock") return sort === "STOCK_DESC";
+    if (field === "sold") return sort === "SOLD_DESC";
+    // POPULAR is DESC
+    return true;
+  };
 
   const {
     register,
@@ -87,7 +166,11 @@ export default function ProductsPage() {
 
   const openCreate = () => {
     setEditingProduct(null);
-    reset({ discountPercent: 0, stockQuantity: 0, arrivalPrice: 0, sellPrice: 0, categoryId: 0, companyId: 0 });
+    reset({ discountPercent: 0, stockQuantity: 0, categoryId: 0, companyId: 0 });
+    setFormattedSellPrice("");
+    setFormattedArrivalPrice("");
+    setFormattedStockQuantity("");
+    setFormattedDiscountPercent("");
     setDialogOpen(true);
   };
 
@@ -103,6 +186,10 @@ export default function ProductsPage() {
       arrivalPrice: product.arrivalPrice,
       sellPrice: product.sellPrice,
     });
+    setFormattedSellPrice(formatNumberWithSpacing(product.sellPrice.toString()));
+    setFormattedArrivalPrice(formatNumberWithSpacing(product.arrivalPrice.toString()));
+    setFormattedStockQuantity(formatNumberWithSpacing(product.stockQuantity.toString()));
+    setFormattedDiscountPercent(formatNumberWithSpacing(product.discountPercent.toString()));
     setDialogOpen(true);
   };
 
@@ -148,16 +235,132 @@ export default function ProductsPage() {
               className="pl-8"
             />
           </div>
+
+          <Select
+            value={categoryId === null ? "ALL" : String(categoryId)}
+            onValueChange={(v) => {
+              setCategoryId(v === "ALL" ? null : Number(v));
+              setPage(0);
+            }}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All categories</SelectItem>
+              {categoriesData?.content.map((c) => (
+                <SelectItem key={c.id} value={String(c.id)}>
+                  {c.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={companyId === null ? "ALL" : String(companyId)}
+            onValueChange={(v) => {
+              setCompanyId(v === "ALL" ? null : Number(v));
+              setPage(0);
+            }}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Company" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All companies</SelectItem>
+              {companiesData?.content.map((c) => (
+                <SelectItem key={c.id} value={String(c.id)}>
+                  {c.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Input
+            type="number"
+            inputMode="numeric"
+            placeholder="Min price"
+            value={minPrice}
+            onChange={(e) => {
+              setMinPrice(e.target.value);
+              setPage(0);
+            }}
+            className="w-[140px]"
+          />
+          <Input
+            type="number"
+            inputMode="numeric"
+            placeholder="Max price"
+            value={maxPrice}
+            onChange={(e) => {
+              setMaxPrice(e.target.value);
+              setPage(0);
+            }}
+            className="w-[140px]"
+          />
         </div>
 
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-20">
+                  <button
+                    onClick={() => handleSort("id")}
+                    className="flex items-center gap-1 hover:text-primary transition-colors"
+                  >
+                    ID
+                    {isSortActive("id") && (
+                      <ChevronUp className={`h-4 w-4 transition-transform ${isSortDesc("id") ? "rotate-180" : ""}`} />
+                    )}
+                  </button>
+                </TableHead>
                 <TableHead>Product</TableHead>
                 <TableHead className="hidden sm:table-cell">Category</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead className="hidden md:table-cell">Stock</TableHead>
+                <TableHead>
+                  <button
+                    onClick={() => handleSort("price")}
+                    className="flex items-center gap-1 hover:text-primary transition-colors"
+                  >
+                    Price
+                    {isSortActive("price") && (
+                      <ChevronUp className={`h-4 w-4 transition-transform ${isSortDesc("price") ? "rotate-180" : ""}`} />
+                    )}
+                  </button>
+                </TableHead>
+                <TableHead>
+                  <button
+                    onClick={() => handleSort("discount")}
+                    className="flex items-center gap-1 hover:text-primary transition-colors"
+                  >
+                    Discount
+                    {isSortActive("discount") && (
+                      <ChevronUp className={`h-4 w-4 transition-transform ${isSortDesc("discount") ? "rotate-180" : ""}`} />
+                    )}
+                  </button>
+                </TableHead>
+                <TableHead className="hidden md:table-cell">
+                  <button
+                    onClick={() => handleSort("stock")}
+                    className="flex items-center gap-1 hover:text-primary transition-colors"
+                  >
+                    Stock
+                    {isSortActive("stock") && (
+                      <ChevronUp className={`h-4 w-4 transition-transform ${isSortDesc("stock") ? "rotate-180" : ""}`} />
+                    )}
+                  </button>
+                </TableHead>
+                <TableHead>
+                  <button
+                    onClick={() => handleSort("sold")}
+                    className="flex items-center gap-1 hover:text-primary transition-colors"
+                  >
+                    Sold
+                    {isSortActive("sold") && (
+                      <ChevronUp className={`h-4 w-4 transition-transform ${isSortDesc("sold") ? "rotate-180" : ""}`} />
+                    )}
+                  </button>
+                </TableHead>
                 <TableHead className="hidden lg:table-cell">Rating</TableHead>
                 <TableHead className="w-10" />
               </TableRow>
@@ -166,13 +369,14 @@ export default function ProductsPage() {
               {isLoading
                 ? Array.from({ length: 8 }).map((_, i) => (
                     <TableRow key={i}>
-                      {Array.from({ length: 6 }).map((_, j) => (
+                      {Array.from({ length: 8 }).map((_, j) => (
                         <TableCell key={j}><Skeleton className="h-8 w-full" /></TableCell>
                       ))}
                     </TableRow>
                   ))
                 : data?.content.map((product, i) => {
                     const mainImage = product.images?.find((img) => img.isMain) ?? product.images?.[0];
+                    const mainImageUrl = mainImage?.imageUrl ?? mainImage?.imageLink;
                     return (
                       <motion.tr
                         key={product.id}
@@ -181,12 +385,15 @@ export default function ProductsPage() {
                         transition={{ delay: i * 0.02 }}
                         className="border-b border-border hover:bg-muted/30 transition-colors"
                       >
+                        <TableCell className="text-sm font-medium text-muted-foreground">
+                          #{product.id}
+                        </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-muted shrink-0 border border-border">
-                              {mainImage ? (
+                              {mainImageUrl ? (
                                 <Image
-                                  src={mainImage.imageLink}
+                                  src={mainImageUrl}
                                   alt={product.name}
                                   fill
                                   className="object-cover"
@@ -209,17 +416,31 @@ export default function ProductsPage() {
                         </TableCell>
                         <TableCell>
                           <div>
-                            <p className="text-sm font-semibold">{formatCurrency(product.sellPrice)}</p>
+                            {product.discountPercent > 0 ? (
+                              <p className="text-xs text-muted-foreground line-through">{formatCurrency(product.sellPrice)}</p>
+                            ) : (
+                              <p className="text-sm font-semibold">{formatCurrency(product.sellPrice)}</p>
+                            )}
                             {product.discountPercent > 0 && (
-                              <p className="text-xs text-muted-foreground line-through">
+                              <p className="text-sm font-semibold">
                                 {formatCurrency(product.discountedPrice)}
                               </p>
                             )}
                           </div>
                         </TableCell>
+                        <TableCell>
+                          <Badge variant={product.discountPercent > 0 ? "warning" : "secondary"}>
+                            {product.discountPercent}%
+                          </Badge>
+                        </TableCell>
                         <TableCell className="hidden md:table-cell">
                           <Badge variant={product.stockQuantity > 0 ? "success" : "destructive"}>
                             {product.stockQuantity}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="secondary" className="font-mono">
+                            {product.soldQuantity || 0}
                           </Badge>
                         </TableCell>
                         <TableCell className="hidden lg:table-cell">
@@ -338,23 +559,59 @@ export default function ProductsPage() {
 
               <div className="space-y-1.5">
                 <Label htmlFor="sellPrice">Sell Price</Label>
-                <Input id="sellPrice" type="number" min="0" {...register("sellPrice")} />
+                <Input 
+                  id="sellPrice" 
+                  type="text" 
+                  value={formattedSellPrice}
+                  onChange={(e) => {
+                    const formatted = formatNumberWithSpacing(e.target.value);
+                    setFormattedSellPrice(formatted);
+                    setValue("sellPrice", parseFormattedNumber(formatted), { shouldValidate: true });
+                  }}
+                />
                 {errors.sellPrice && <p className="text-xs text-destructive">{errors.sellPrice.message}</p>}
               </div>
 
               <div className="space-y-1.5">
                 <Label htmlFor="arrivalPrice">Arrival Price</Label>
-                <Input id="arrivalPrice" type="number" min="0" {...register("arrivalPrice")} />
+                <Input 
+                  id="arrivalPrice" 
+                  type="text" 
+                  value={formattedArrivalPrice}
+                  onChange={(e) => {
+                    const formatted = formatNumberWithSpacing(e.target.value);
+                    setFormattedArrivalPrice(formatted);
+                    setValue("arrivalPrice", parseFormattedNumber(formatted), { shouldValidate: true });
+                  }}
+                />
               </div>
 
               <div className="space-y-1.5">
                 <Label htmlFor="stockQuantity">Stock</Label>
-                <Input id="stockQuantity" type="number" min="0" {...register("stockQuantity")} />
+                <Input 
+                  id="stockQuantity" 
+                  type="text" 
+                  value={formattedStockQuantity}
+                  onChange={(e) => {
+                    const formatted = formatNumberWithSpacing(e.target.value);
+                    setFormattedStockQuantity(formatted);
+                    setValue("stockQuantity", parseFormattedNumber(formatted), { shouldValidate: true });
+                  }}
+                />
               </div>
 
               <div className="space-y-1.5">
                 <Label htmlFor="discountPercent">Discount %</Label>
-                <Input id="discountPercent" type="number" min="0" max="100" {...register("discountPercent")} />
+                <Input 
+                  id="discountPercent" 
+                  type="text" 
+                  value={formattedDiscountPercent}
+                  onChange={(e) => {
+                    const formatted = formatNumberWithSpacing(e.target.value);
+                    setFormattedDiscountPercent(formatted);
+                    setValue("discountPercent", parseFormattedNumber(formatted), { shouldValidate: true });
+                  }}
+                />
               </div>
             </div>
 
@@ -377,7 +634,10 @@ export default function ProductsPage() {
             <DialogTitle>Upload Images — {imageUploadProduct?.name}</DialogTitle>
           </DialogHeader>
           {imageUploadProduct && (
-            <ProductImageUpload productId={imageUploadProduct.id} />
+            <ProductImageUpload 
+              productId={imageUploadProduct.id} 
+              onUploadComplete={handleImageUploadComplete}
+            />
           )}
         </DialogContent>
       </Dialog>
