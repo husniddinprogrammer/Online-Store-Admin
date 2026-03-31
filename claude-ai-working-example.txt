@@ -419,3 +419,176 @@ Also:
 - Use react-dropzone for drag & drop
 - Add image crop (16:9) using react-easy-crop
 - Show aspect ratio overlay (16:9 grid)
+ 
+5-Task
+Role: Senior frontend engineer + data visualization expert
+
+Task:
+Build admin dashboard UI for analytics
+
+Tech Stack:
+- Next.js 14 (App Router)
+- TypeScript
+- Tailwind CSS
+- shadcn/ui
+- React Query
+- Axios
+- Recharts (charts)
+- Framer Motion
+
+Design:
+- Modern Material UI
+- Primary color: blue
+- Clean, minimal
+- Responsive
+- Card-based layout
+
+--------------------------------
+DATA SOURCE
+--------------------------------
+
+API:
+GET /api/admin/analytics
+
+Done. Full summary of what was built:
+
+Files created/modified:
+
+File	What
+AnalyticsPeriod.java	DAILY / WEEKLY / MONTHLY / CUSTOM enum
+TopSellingProductDto.java	productId, name, totalSold, revenue
+RevenueChartPointDto.java	date, revenue — chart-ready data
+AnalyticsResponse.java	Full response DTO
+RedisCacheConfig.java	Per-period TTLs: DAILY=5m, WEEKLY=30m, MONTHLY=1h, CUSTOM=10m
+OrderRepository.java	sumTotalProfit, sumTotalRevenue, countOrdersInPeriod, getRevenueChartData
+OrderItemRepository.java	sumSoldQuantity, findTopSellingProducts (native, pageable for top-N)
+UserRepository.java	countByCreatedAtBetween
+ProductRepository.java	countByCreatedAtBetween
+AnalyticsService.java	Business logic + @Caching for per-period cache names
+AnalyticsController.java	GET /api/admin/analytics
+Frontend usage:
+
+
+// DAILY
+GET /api/admin/analytics?period=DAILY
+
+// WEEKLY, top 5 products
+GET /api/admin/analytics?period=WEEKLY&topLimit=5
+
+// CUSTOM range
+GET /api/admin/analytics?period=CUSTOM&fromDate=2026-01-01&toDate=2026-01-31&topLimit=10
+
+Response:
+{
+  "totalProfit": number,
+  "totalRevenue": number,
+  "totalSoldProductsCount": number,
+  "totalOrdersCount": number,
+  "totalUsersAdded": number,
+  "totalProductsAdded": number,
+  "topSellingProducts": [...]
+}
+
+--------------------------------
+LAYOUT
+--------------------------------
+
+- Navbar
+- Sidebar
+- Main dashboard
+
+--------------------------------
+1. STATS CARDS
+--------------------------------
+
+Create cards for:
+- Total Profit
+- Total Revenue
+- Orders Count
+- Sold Products Count
+- New Users
+- New Products
+
+UI:
+- Icon + label + value
+- Soft shadow
+- Hover animation
+
+--------------------------------
+2. CHARTS
+--------------------------------
+
+Use Recharts:
+
+- Revenue chart (line chart)
+- Orders chart (bar chart)
+
+--------------------------------
+3. TOP PRODUCTS
+--------------------------------
+
+- Table or card list
+- Show top 10 products
+- Columns:
+  - name
+  - sold count
+  - revenue
+
+--------------------------------
+4. FILTERS
+--------------------------------
+
+- Period select:
+  - DAILY
+  - WEEKLY
+  - MONTHLY
+  - CUSTOM
+
+- Date picker (for CUSTOM)
+
+--------------------------------
+5. STATE MANAGEMENT
+--------------------------------
+
+- Use React Query
+- Refetch when filter changes
+
+--------------------------------
+6. UX
+--------------------------------
+
+- Loading skeletons
+- Error handling
+- Smooth transitions
+
+--------------------------------
+7. COMPONENTS
+--------------------------------
+
+- StatsCard
+- ChartCard
+- TopProductsTable
+- FilterBar
+
+--------------------------------
+OUTPUT
+--------------------------------
+
+- Full dashboard page
+- Components
+- API integration
+- Clean scalable code
+
+--------------------------------
+IMPORTANT
+--------------------------------
+
+- Think like senior engineer
+- Focus on UX + performance
+- Avoid unnecessary re-renders
+- Make components reusable
+Also:
+- Add animated counters
+- Add dark mode support
+- Add gradient charts
+- Add skeleton loaders

@@ -275,6 +275,44 @@ export interface Payment {
   createdAt: string;
 }
 
+// ─── Analytics ───────────────────────────────────────────────────────────────
+
+export type AnalyticsPeriod = "DAILY" | "WEEKLY" | "MONTHLY" | "CUSTOM";
+
+export interface AnalyticsParams {
+  period: AnalyticsPeriod;
+  /** Required when period = CUSTOM (YYYY-MM-DD) */
+  fromDate?: string;
+  /** Required when period = CUSTOM (YYYY-MM-DD) */
+  toDate?: string;
+  /** Number of top products to return — default 10 */
+  topLimit?: number;
+}
+
+export interface TopSellingProduct {
+  productId: number;
+  name: string;
+  totalSold: number;
+  revenue: number;
+}
+
+export interface RevenueChartPoint {
+  date: string;
+  revenue: number;
+}
+
+export interface AnalyticsData {
+  totalProfit: number;
+  totalRevenue: number;
+  totalSoldProductsCount: number;
+  totalOrdersCount: number;
+  totalUsersAdded: number;
+  totalProductsAdded: number;
+  topSellingProducts: TopSellingProduct[];
+  /** Present when backend includes chart-ready time series data */
+  revenueChartData?: RevenueChartPoint[];
+}
+
 // ─── Query Params ────────────────────────────────────────────────────────────
 
 export interface PaginationParams {

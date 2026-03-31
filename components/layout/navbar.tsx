@@ -1,10 +1,9 @@
 "use client";
 
-import { Bell, Moon, Sun, Search, Menu } from "lucide-react";
+import { Bell, Moon, Sun, Menu } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -51,12 +50,6 @@ export function Navbar({ onMobileMenuToggle }: NavbarProps) {
         <Menu className="h-5 w-5" />
         <span className="sr-only">Toggle menu</span>
       </Button>
-
-      {/* Search */}
-      <div className="relative flex-1 max-w-sm">
-        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Search..." className="pl-8 bg-muted/40 border-transparent focus-visible:bg-background" />
-      </div>
 
       <div className="ml-auto flex items-center gap-2">
         {/* Theme Toggle */}

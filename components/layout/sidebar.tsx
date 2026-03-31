@@ -13,6 +13,7 @@ import {
   MessageSquare,
   Bell,
   Image,
+  BarChart2,
   ChevronLeft,
   ChevronRight,
   Store,
@@ -39,6 +40,7 @@ const navItems = [
   { href: "/comments", label: "Reviews", icon: MessageSquare },
   { href: "/notifications", label: "Notifications", icon: Bell },
   { href: "/posters", label: "Posters", icon: Image },
+  { href: "/analytics", label: "Analytics", icon: BarChart2 },
 ];
 
 interface SidebarProps {
