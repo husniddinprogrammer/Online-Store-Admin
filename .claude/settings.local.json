@@ -2,6 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(npm install:*)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\User\\Desktop\\online-store-admin page\\online-store-admin"
     ]
   }
 }

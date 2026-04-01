@@ -15,16 +15,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { useOrders, useUpdateOrderStatus } from "@/hooks/use-orders";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { useTranslations } from "@/hooks/use-translations";
 import type { OrderStatus, Order } from "@/types";
-
-const STATUS_OPTIONS: { value: OrderStatus | "ALL"; label: string }[] = [
-  { value: "ALL", label: "All statuses" },
-  { value: "PENDING", label: "Pending" },
-  { value: "PAID", label: "Paid" },
-  { value: "SHIPPED", label: "Shipped" },
-  { value: "DELIVERED", label: "Delivered" },
-  { value: "CANCELLED", label: "Cancelled" },
-];
 
 const NEXT_STATUS: Partial<Record<OrderStatus, OrderStatus>> = {
   PENDING: "PAID",
@@ -33,6 +25,7 @@ const NEXT_STATUS: Partial<Record<OrderStatus, OrderStatus>> = {
 };
 
 function OrderRow({ order }: { order: Order }) {
+  const t = useTranslations();
   const [expanded, setExpanded] = useState(false);
   const updateStatus = useUpdateOrderStatus();
 
@@ -60,7 +53,7 @@ function OrderRow({ order }: { order: Order }) {
           <OrderStatusBadge status={order.status} />
         </TableCell>
         <TableCell className="hidden md:table-cell text-sm text-muted-foreground">
-          {order.items?.length ?? 0} items
+          {order.items?.length ?? 0} {t("orders.items").toLowerCase()}
         </TableCell>
         <TableCell className="text-sm font-semibold">{formatCurrency(order.totalAmount)}</TableCell>
         <TableCell className="hidden lg:table-cell text-xs text-muted-foreground">
@@ -92,7 +85,6 @@ function OrderRow({ order }: { order: Order }) {
         </TableCell>
       </TableRow>
 
-      {/* Expanded Row */}
       {expanded && (
         <TableRow>
           <TableCell colSpan={7} className="bg-muted/20 px-6 py-4">
@@ -100,7 +92,7 @@ function OrderRow({ order }: { order: Order }) {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                 {order.deliveryAddress && (
                   <div>
-                    <p className="font-medium text-muted-foreground mb-1">Delivery Address</p>
+                    <p className="font-medium text-muted-foreground mb-1">{t("orders.deliveryAddress")}</p>
                     <p>
                       {order.deliveryAddress.regionType} — {order.deliveryAddress.cityType}
                     </p>
@@ -111,7 +103,7 @@ function OrderRow({ order }: { order: Order }) {
                 )}
                 {order.note && (
                   <div>
-                    <p className="font-medium text-muted-foreground mb-1">Note</p>
+                    <p className="font-medium text-muted-foreground mb-1">{t("orders.note")}</p>
                     <p className="italic">{order.note}</p>
                   </div>
                 )}
@@ -120,7 +112,7 @@ function OrderRow({ order }: { order: Order }) {
               <Separator />
 
               <div className="space-y-2">
-                <p className="font-medium text-sm">Order Items</p>
+                <p className="font-medium text-sm">{t("orders.orderItems")}</p>
                 {order.items?.map((item) => (
                   <div key={item.id} className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-2">
@@ -142,9 +134,19 @@ function OrderRow({ order }: { order: Order }) {
 }
 
 export default function OrdersPage() {
+  const t = useTranslations();
   const [statusFilter, setStatusFilter] = useState<OrderStatus | "ALL">("ALL");
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(20);
+
+  const STATUS_OPTIONS: { value: OrderStatus | "ALL"; label: string }[] = [
+    { value: "ALL", label: t("orders.allStatuses") },
+    { value: "PENDING", label: "Pending" },
+    { value: "PAID", label: "Paid" },
+    { value: "SHIPPED", label: "Shipped" },
+    { value: "DELIVERED", label: "Delivered" },
+    { value: "CANCELLED", label: "Cancelled" },
+  ];
 
   const { data, isLoading } = useOrders({
     status: statusFilter === "ALL" ? undefined : statusFilter,
@@ -155,7 +157,7 @@ export default function OrdersPage() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
-      <PageHeader title="Orders" description={`${data?.totalElements ?? "..."} total orders`} />
+      <PageHeader title={t("orders.title")} description={t("orders.subtitle", { count: data?.totalElements ?? "..." })} />
 
       <Card>
         <div className="flex items-center gap-3 p-4 border-b border-border">
@@ -180,13 +182,13 @@ export default function OrdersPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Order</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="hidden md:table-cell">Items</TableHead>
-                <TableHead>Total</TableHead>
-                <TableHead className="hidden lg:table-cell">Date</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>{t("orders.order")}</TableHead>
+                <TableHead>{t("orders.customer")}</TableHead>
+                <TableHead>{t("common.status")}</TableHead>
+                <TableHead className="hidden md:table-cell">{t("orders.items")}</TableHead>
+                <TableHead>{t("orders.total")}</TableHead>
+                <TableHead className="hidden lg:table-cell">{t("common.date")}</TableHead>
+                <TableHead>{t("common.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

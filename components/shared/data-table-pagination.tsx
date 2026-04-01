@@ -3,6 +3,7 @@
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useTranslations } from "@/hooks/use-translations";
 
 interface DataTablePaginationProps {
   page: number;
@@ -21,17 +22,20 @@ export function DataTablePagination({
   onPageChange,
   onPageSizeChange,
 }: DataTablePaginationProps) {
+  const t = useTranslations();
   const start = page * pageSize + 1;
   const end = Math.min((page + 1) * pageSize, totalElements);
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-1">
       <p className="text-sm text-muted-foreground">
-        {totalElements === 0 ? "No results" : `${start}–${end} of ${totalElements} results`}
+        {totalElements === 0
+          ? t("common.noResults")
+          : `${start}–${end} ${t("common.of")} ${totalElements} ${t("common.results")}`}
       </p>
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground whitespace-nowrap">Rows per page</span>
+          <span className="text-sm text-muted-foreground whitespace-nowrap">{t("common.rowsPerPage")}</span>
           <Select value={String(pageSize)} onValueChange={(v) => onPageSizeChange(Number(v))}>
             <SelectTrigger className="h-8 w-16">
               <SelectValue />

@@ -20,9 +20,11 @@ import {
 } from "@/components/ui/dialog";
 import { usePosters, useCreatePoster, useUpdatePoster, useDeletePoster } from "@/hooks/use-posters";
 import { img } from "@/lib/utils";
+import { useTranslations } from "@/hooks/use-translations";
 import type { Poster } from "@/types";
 
 export default function PostersPage() {
+  const t = useTranslations();
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(12);
 
@@ -48,14 +50,13 @@ export default function PostersPage() {
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
-      <PageHeader title="Posters" description={`${data?.totalElements ?? "..."} banners`}>
+      <PageHeader title={t("posters.title")} description={t("posters.subtitle", { count: data?.totalElements ?? "..." })}>
         <Button size="sm" onClick={() => setCreateOpen(true)}>
           <Plus className="h-4 w-4" />
-          Add Poster
+          {t("posters.addPoster")}
         </Button>
       </PageHeader>
 
-      {/* Poster grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {isLoading
           ? Array.from({ length: 6 }).map((_, i) => (
@@ -75,7 +76,6 @@ export default function PostersPage() {
                 transition={{ delay: i * 0.04 }}
               >
                 <Card className="overflow-hidden group">
-                  {/* 16:9 thumbnail */}
                   <div className="relative w-full bg-muted" style={{ paddingBottom: "56.25%" }}>
                     {poster.imageLink ? (
                       <Image
@@ -91,7 +91,6 @@ export default function PostersPage() {
                       </div>
                     )}
 
-                    {/* Hover action overlay */}
                     <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button
                         size="sm"
@@ -99,7 +98,7 @@ export default function PostersPage() {
                         onClick={() => setReplaceTarget(poster)}
                       >
                         <RefreshCw className="h-3.5 w-3.5" />
-                        Replace
+                        {t("posters.replaceImage")}
                       </Button>
                       <Button
                         size="sm"
@@ -107,12 +106,11 @@ export default function PostersPage() {
                         onClick={() => setDeleteTarget(poster)}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
-                        Delete
+                        {t("common.delete")}
                       </Button>
                     </div>
                   </div>
 
-                  {/* Card footer */}
                   <div className="flex items-center justify-between gap-2 px-3 py-2.5">
                     <div className="flex items-center gap-1.5 min-w-0">
                       {poster.link ? (
@@ -126,7 +124,7 @@ export default function PostersPage() {
                           <span className="truncate">{poster.link.replace(/^https?:\/\//, "")}</span>
                         </a>
                       ) : (
-                        <span className="text-xs text-muted-foreground">No link</span>
+                        <span className="text-xs text-muted-foreground">{t("posters.noLink")}</span>
                       )}
                     </div>
                     <Badge variant="secondary" className="shrink-0 gap-1 text-xs">
@@ -139,19 +137,18 @@ export default function PostersPage() {
             ))}
       </div>
 
-      {/* Empty state */}
       {!isLoading && data?.content.length === 0 && (
         <Card className="flex flex-col items-center justify-center gap-3 py-16 text-center">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
             <ImageIcon className="h-6 w-6 text-muted-foreground" />
           </div>
           <div>
-            <p className="font-medium">No posters yet</p>
-            <p className="text-sm text-muted-foreground mt-0.5">Upload a banner to get started</p>
+            <p className="font-medium">{t("posters.noPosters")}</p>
+            <p className="text-sm text-muted-foreground mt-0.5">{t("posters.noPostersDesc")}</p>
           </div>
           <Button size="sm" onClick={() => setCreateOpen(true)}>
             <Plus className="h-4 w-4" />
-            Add Poster
+            {t("posters.addPoster")}
           </Button>
         </Card>
       )}
@@ -167,11 +164,10 @@ export default function PostersPage() {
         />
       )}
 
-      {/* Create Dialog */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Add Poster</DialogTitle>
+            <DialogTitle>{t("posters.addPoster")}</DialogTitle>
           </DialogHeader>
           <PosterUpload
             onSubmit={handleCreate}
@@ -180,11 +176,10 @@ export default function PostersPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Replace Image Dialog */}
       <Dialog open={!!replaceTarget} onOpenChange={(open) => !open && setReplaceTarget(null)}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Replace Image</DialogTitle>
+            <DialogTitle>{t("posters.replaceImage")}</DialogTitle>
           </DialogHeader>
           {replaceTarget && (
             <PosterUpload
@@ -197,13 +192,12 @@ export default function PostersPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirm */}
       <ConfirmDialog
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title="Delete Poster"
-        description="Delete this poster? This cannot be undone."
-        confirmLabel="Delete"
+        title={t("posters.title")}
+        description={t("posters.confirmDelete")}
+        confirmLabel={t("common.delete")}
         onConfirm={async () => {
           if (deleteTarget) await deletePoster.mutateAsync(deleteTarget.id);
           setDeleteTarget(null);

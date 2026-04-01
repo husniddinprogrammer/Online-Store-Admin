@@ -6,26 +6,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "@/hooks/use-translations";
 import type { TopSellingProduct } from "@/types";
-
-// ─── Props ────────────────────────────────────────────────────────────────────
 
 interface TopProductsTableProps {
   data: TopSellingProduct[] | undefined;
   isLoading: boolean;
 }
 
-// ─── Medal colors for top 3 ───────────────────────────────────────────────────
-
 const MEDAL_COLORS = [
-  "text-yellow-500",  // 🥇
-  "text-slate-400",   // 🥈
-  "text-orange-400",  // 🥉
+  "text-yellow-500",
+  "text-slate-400",
+  "text-orange-400",
 ];
 
-// ─── Component ────────────────────────────────────────────────────────────────
-
 export function TopProductsTable({ data, isLoading }: TopProductsTableProps) {
+  const t = useTranslations();
   const maxRevenue = data?.[0]?.revenue ?? 1;
 
   return (
@@ -33,7 +29,7 @@ export function TopProductsTable({ data, isLoading }: TopProductsTableProps) {
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-base">
           <Trophy className="h-4 w-4 text-primary" />
-          Top Selling Products
+          {t("analytics.topProducts")}
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
@@ -41,9 +37,9 @@ export function TopProductsTable({ data, isLoading }: TopProductsTableProps) {
           <TableHeader>
             <TableRow>
               <TableHead className="w-10 pl-6">#</TableHead>
-              <TableHead>Product</TableHead>
-              <TableHead className="text-right">Units Sold</TableHead>
-              <TableHead className="text-right pr-6">Revenue</TableHead>
+              <TableHead>{t("products.title")}</TableHead>
+              <TableHead className="text-right">{t("analytics.unitsSold")}</TableHead>
+              <TableHead className="text-right pr-6">{t("analytics.revenue")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -61,7 +57,7 @@ export function TopProductsTable({ data, isLoading }: TopProductsTableProps) {
                 ? (
                   <TableRow>
                     <TableCell colSpan={4} className="text-center text-sm text-muted-foreground py-10">
-                      No product data for this period
+                      {t("analytics.noProductData")}
                     </TableCell>
                   </TableRow>
                 )
@@ -73,18 +69,15 @@ export function TopProductsTable({ data, isLoading }: TopProductsTableProps) {
                     transition={{ delay: i * 0.04 }}
                     className="border-b border-border hover:bg-muted/30 transition-colors"
                   >
-                    {/* Rank */}
                     <TableCell className="pl-6 font-medium tabular-nums">
                       <span className={cn("font-bold", MEDAL_COLORS[i] ?? "text-muted-foreground")}>
                         {i + 1}
                       </span>
                     </TableCell>
 
-                    {/* Name + revenue bar */}
                     <TableCell>
                       <div className="space-y-1.5">
                         <span className="text-sm font-medium leading-none">{product.name}</span>
-                        {/* Proportional revenue bar */}
                         <div className="h-1 w-full max-w-[200px] rounded-full bg-muted overflow-hidden">
                           <div
                             className="h-full rounded-full bg-primary transition-all duration-700"
@@ -94,12 +87,10 @@ export function TopProductsTable({ data, isLoading }: TopProductsTableProps) {
                       </div>
                     </TableCell>
 
-                    {/* Units sold */}
                     <TableCell className="text-right tabular-nums font-medium">
                       {product.totalSold.toLocaleString()}
                     </TableCell>
 
-                    {/* Revenue */}
                     <TableCell className="text-right pr-6 tabular-nums">
                       <span className="font-semibold">{product.revenue.toLocaleString()}</span>
                       <span className="text-xs text-muted-foreground ml-1">UZS</span>

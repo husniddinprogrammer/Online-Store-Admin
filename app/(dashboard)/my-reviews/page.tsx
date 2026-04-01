@@ -14,9 +14,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMyReviews } from "@/hooks/use-reviews";
 import { formatDate, formatCurrency, img } from "@/lib/utils";
+import { useTranslations } from "@/hooks/use-translations";
 import type { NotReviewedProduct } from "@/types";
-
-// ─── Skeletons ────────────────────────────────────────────────────────────────
 
 function ReviewSkeleton() {
   return (
@@ -47,9 +46,8 @@ function PendingSkeleton() {
   );
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
-
 export default function MyReviewsPage() {
+  const t = useTranslations();
   const { data, isLoading } = useMyReviews();
   const [modalProduct, setModalProduct] = useState<NotReviewedProduct | null>(null);
 
@@ -59,15 +57,15 @@ export default function MyReviewsPage() {
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
       <PageHeader
-        title="My Reviews"
-        description="Your product reviews and pending feedback"
+        title={t("myReviews.title")}
+        description={t("myReviews.subtitle")}
       />
 
       <Tabs defaultValue="pending">
         <TabsList className="w-full sm:w-auto">
           <TabsTrigger value="pending" className="gap-2">
             <Clock className="h-3.5 w-3.5" />
-            Pending
+            {t("myReviews.pending")}
             {notReviewed.length > 0 && (
               <Badge variant="secondary" className="ml-1 h-4 px-1.5 text-[10px]">
                 {notReviewed.length}
@@ -76,7 +74,7 @@ export default function MyReviewsPage() {
           </TabsTrigger>
           <TabsTrigger value="reviewed" className="gap-2">
             <Star className="h-3.5 w-3.5" />
-            Reviewed
+            {t("myReviews.reviewed")}
             {reviewed.length > 0 && (
               <Badge variant="secondary" className="ml-1 h-4 px-1.5 text-[10px]">
                 {reviewed.length}
@@ -85,7 +83,6 @@ export default function MyReviewsPage() {
           </TabsTrigger>
         </TabsList>
 
-        {/* ── Pending reviews ───────────────────────────────────────────── */}
         <TabsContent value="pending" className="mt-4">
           {isLoading ? (
             <div className="space-y-3">
@@ -94,8 +91,8 @@ export default function MyReviewsPage() {
           ) : notReviewed.length === 0 ? (
             <EmptyState
               icon={MessageSquare}
-              title="No pending reviews"
-              description="All your purchased products have been reviewed."
+              title={t("myReviews.noPending")}
+              description={t("myReviews.noPendingDesc")}
             />
           ) : (
             <motion.div
@@ -141,7 +138,7 @@ export default function MyReviewsPage() {
                       onClick={() => setModalProduct(product)}
                     >
                       <PenLine className="h-3.5 w-3.5" />
-                      Write Review
+                      {t("myReviews.writeReview")}
                     </Button>
                   </Card>
                 </motion.div>
@@ -150,7 +147,6 @@ export default function MyReviewsPage() {
           )}
         </TabsContent>
 
-        {/* ── My reviews ────────────────────────────────────────────────── */}
         <TabsContent value="reviewed" className="mt-4">
           {isLoading ? (
             <div className="space-y-3">
@@ -159,8 +155,8 @@ export default function MyReviewsPage() {
           ) : reviewed.length === 0 ? (
             <EmptyState
               icon={Star}
-              title="No reviews yet"
-              description="Products you review will appear here."
+              title={t("myReviews.noReviews")}
+              description={t("myReviews.noReviewsDesc")}
             />
           ) : (
             <motion.div
@@ -218,8 +214,6 @@ export default function MyReviewsPage() {
     </div>
   );
 }
-
-// ─── Empty State ──────────────────────────────────────────────────────────────
 
 function EmptyState({
   icon: Icon,

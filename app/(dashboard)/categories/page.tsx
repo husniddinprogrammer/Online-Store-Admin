@@ -26,6 +26,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCategories, useCreateCategory, useUpdateCategory, useDeleteCategory } from "@/hooks/use-categories";
 import { img } from "@/lib/utils";
+import { useTranslations } from "@/hooks/use-translations";
 import type { Category } from "@/types";
 
 const categorySchema = z.object({
@@ -34,6 +35,7 @@ const categorySchema = z.object({
 type CategoryFormData = z.infer<typeof categorySchema>;
 
 export default function CategoriesPage() {
+  const t = useTranslations();
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(20);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -68,7 +70,6 @@ export default function CategoriesPage() {
   };
 
   const onSubmit = async (formData: CategoryFormData) => {
-    // Image required when creating
     if (!editingItem && !imageFile) {
       setImageError("Image is required");
       return;
@@ -85,10 +86,10 @@ export default function CategoriesPage() {
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
-      <PageHeader title="Categories" description={`${data?.totalElements ?? "..."} categories`}>
+      <PageHeader title={t("categories.title")} description={t("categories.subtitle", { count: data?.totalElements ?? "..." })}>
         <Button size="sm" onClick={openCreate}>
           <Plus className="h-4 w-4" />
-          Add Category
+          {t("categories.addCategory")}
         </Button>
       </PageHeader>
 
@@ -97,9 +98,9 @@ export default function CategoriesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-16">Image</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead className="w-24">Actions</TableHead>
+                <TableHead className="w-16">{t("common.image")}</TableHead>
+                <TableHead>{t("common.name")}</TableHead>
+                <TableHead className="w-24">{t("common.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -166,24 +167,23 @@ export default function CategoriesPage() {
         )}
       </Card>
 
-      {/* Create / Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle>{editingItem ? "Edit Category" : "Add Category"}</DialogTitle>
+            <DialogTitle>{editingItem ? t("categories.editCategory") : t("categories.addCategory")}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="cat-name">Name</Label>
+              <Label htmlFor="cat-name">{t("common.name")}</Label>
               <Input id="cat-name" {...register("name")} />
               {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
             </div>
 
             <div className="space-y-1.5">
               <Label>
-                Image
+                {t("common.image")}
                 {!editingItem && <span className="text-destructive ml-0.5">*</span>}
-                {editingItem && <span className="ml-1 text-xs text-muted-foreground">(leave empty to keep current)</span>}
+                {editingItem && <span className="ml-1 text-xs text-muted-foreground">({t("categories.keepCurrent")})</span>}
               </Label>
               <ImagePicker
                 value={imageFile}
@@ -194,22 +194,21 @@ export default function CategoriesPage() {
             </div>
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>{t("common.cancel")}</Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Saving..." : editingItem ? "Save" : "Create"}
+                {isSubmitting ? t("common.loading") : editingItem ? t("common.save") : t("common.create")}
               </Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirm */}
       <ConfirmDialog
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title="Delete Category"
-        description={`Delete "${deleteTarget?.name}"? This cannot be undone.`}
-        confirmLabel="Delete"
+        title={t("categories.title")}
+        description={t("categories.confirmDelete", { name: deleteTarget?.name ?? "" })}
+        confirmLabel={t("common.delete")}
         onConfirm={async () => {
           if (deleteTarget) await deleteCategory.mutateAsync(deleteTarget.id);
           setDeleteTarget(null);

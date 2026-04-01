@@ -16,6 +16,7 @@ import {
   useDeleteNotification,
 } from "@/hooks/use-notifications";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "@/hooks/use-translations";
 import type { NotificationType } from "@/types";
 
 const typeVariant: Record<NotificationType, "info" | "success" | "warning" | "destructive"> = {
@@ -26,6 +27,7 @@ const typeVariant: Record<NotificationType, "info" | "success" | "warning" | "de
 };
 
 export default function NotificationsPage() {
+  const t = useTranslations();
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(20);
 
@@ -39,13 +41,13 @@ export default function NotificationsPage() {
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
       <PageHeader
-        title="Notifications"
-        description={unseenCount > 0 ? `${unseenCount} unread` : "All caught up"}
+        title={t("notifications.title")}
+        description={unseenCount > 0 ? `${unseenCount} unread` : t("notifications.noNotificationsDesc")}
       >
         {unseenCount > 0 && (
           <Button size="sm" variant="outline" onClick={() => markAllSeen.mutate()} disabled={markAllSeen.isPending}>
             <CheckCheck className="h-4 w-4" />
-            Mark all read
+            {t("notifications.markAllRead")}
           </Button>
         )}
       </PageHeader>
@@ -64,7 +66,7 @@ export default function NotificationsPage() {
           ) : !data?.content.length ? (
             <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
               <Bell className="h-10 w-10 mb-3 opacity-30" />
-              <p>No notifications</p>
+              <p>{t("notifications.noNotifications")}</p>
             </div>
           ) : (
             <div className="divide-y divide-border">

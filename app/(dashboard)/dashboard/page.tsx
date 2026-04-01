@@ -13,9 +13,10 @@ import { useOrders } from "@/hooks/use-orders";
 import { useProducts } from "@/hooks/use-products";
 import { useNotifications } from "@/hooks/use-notifications";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import type { Metadata } from "next";
+import { useTranslations } from "@/hooks/use-translations";
 
 export default function DashboardPage() {
+  const t = useTranslations();
   const { data: usersData, isLoading: usersLoading } = useUsers({ size: 1 });
   const { data: ordersData, isLoading: ordersLoading } = useOrders({ size: 5, sort: "createdAt,desc" });
   const { data: productsData, isLoading: productsLoading } = useProducts({ size: 1 });
@@ -27,7 +28,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
-      <PageHeader title="Dashboard" description="Overview of your store performance" />
+      <PageHeader title={t("dashboard.title")} description={t("dashboard.subtitle")} />
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -36,10 +37,10 @@ export default function DashboardPage() {
         ) : (
           <StatsCard
             index={0}
-            title="Total Users"
+            title={t("dashboard.totalUsers")}
             value={usersData?.totalElements?.toLocaleString() ?? "—"}
             icon={Users}
-            description="Registered accounts"
+            description={t("dashboard.registeredAccounts")}
             iconClassName="bg-blue-500/10"
           />
         )}
@@ -49,10 +50,10 @@ export default function DashboardPage() {
         ) : (
           <StatsCard
             index={1}
-            title="Total Orders"
+            title={t("dashboard.totalOrders")}
             value={ordersData?.totalElements?.toLocaleString() ?? "—"}
             icon={ShoppingCart}
-            description="All time orders"
+            description={t("dashboard.allTimeOrders")}
             iconClassName="bg-orange-500/10"
           />
         )}
@@ -62,20 +63,20 @@ export default function DashboardPage() {
         ) : (
           <StatsCard
             index={2}
-            title="Products"
+            title={t("dashboard.products")}
             value={productsData?.totalElements?.toLocaleString() ?? "—"}
             icon={Package}
-            description="Active listings"
+            description={t("dashboard.activeListings")}
             iconClassName="bg-purple-500/10"
           />
         )}
 
         <StatsCard
           index={3}
-          title="Revenue"
+          title={t("dashboard.revenue")}
           value={formatCurrency(totalRevenue)}
           icon={DollarSign}
-          description="From recent orders"
+          description={t("dashboard.fromRecentOrders")}
           iconClassName="bg-green-500/10"
         />
       </div>
@@ -86,7 +87,7 @@ export default function DashboardPage() {
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
               <TrendingUp className="h-4 w-4 text-primary" />
-              Recent Orders
+              {t("dashboard.recentOrders")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -97,7 +98,7 @@ export default function DashboardPage() {
                 ))}
               </div>
             ) : !ordersData?.content.length ? (
-              <p className="text-sm text-muted-foreground text-center py-8">No orders yet</p>
+              <p className="text-sm text-muted-foreground text-center py-8">{t("dashboard.noOrders")}</p>
             ) : (
               <div className="space-y-3">
                 {ordersData.content.map((order, i) => (
@@ -130,7 +131,7 @@ export default function DashboardPage() {
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
               <Clock className="h-4 w-4 text-primary" />
-              Notifications
+              {t("dashboard.notifications")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -141,7 +142,7 @@ export default function DashboardPage() {
                 ))}
               </div>
             ) : !notificationsData?.content.length ? (
-              <p className="text-sm text-muted-foreground text-center py-8">No notifications</p>
+              <p className="text-sm text-muted-foreground text-center py-8">{t("dashboard.noNotifications")}</p>
             ) : (
               <div className="space-y-2">
                 {notificationsData.content.map((notif, i) => (

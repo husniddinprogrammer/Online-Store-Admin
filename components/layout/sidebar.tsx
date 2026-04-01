@@ -29,18 +29,19 @@ import { authService } from "@/services/auth.service";
 import { tokenStorage } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useTranslations } from "@/hooks/use-translations";
 
-const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/users", label: "Users", icon: Users },
-  { href: "/products", label: "Products", icon: Package },
-  { href: "/orders", label: "Orders", icon: ShoppingCart },
-  { href: "/categories", label: "Categories", icon: Tag },
-  { href: "/companies", label: "Companies", icon: Building2 },
-  { href: "/comments", label: "Reviews", icon: MessageSquare },
-  { href: "/notifications", label: "Notifications", icon: Bell },
-  { href: "/posters", label: "Posters", icon: Image },
-  { href: "/analytics", label: "Analytics", icon: BarChart2 },
+const navItemDefs = [
+  { href: "/dashboard", key: "nav.dashboard", icon: LayoutDashboard },
+  { href: "/users", key: "nav.users", icon: Users },
+  { href: "/products", key: "nav.products", icon: Package },
+  { href: "/orders", key: "nav.orders", icon: ShoppingCart },
+  { href: "/categories", key: "nav.categories", icon: Tag },
+  { href: "/companies", key: "nav.companies", icon: Building2 },
+  { href: "/comments", key: "nav.reviews", icon: MessageSquare },
+  { href: "/notifications", key: "nav.notifications", icon: Bell },
+  { href: "/posters", key: "nav.posters", icon: Image },
+  { href: "/analytics", key: "nav.analytics", icon: BarChart2 },
 ];
 
 const telegramLink = "https://t.me/mahmudovhusniddin";
@@ -55,6 +56,8 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const router = useRouter();
   const { clearAuth } = useAuthStore();
   const [loggingOut, setLoggingOut] = useState(false);
+  const t = useTranslations();
+  const navItems = navItemDefs.map((item) => ({ ...item, label: t(item.key) }));
 
   const handleLogout = async () => {
     setLoggingOut(true);
@@ -219,13 +222,13 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                       transition={{ duration: 0.15 }}
                       className="whitespace-nowrap overflow-hidden"
                     >
-                      {loggingOut ? "Logging out..." : "Logout"}
+                      {loggingOut ? t("common.loading") : t("auth.logout")}
                     </motion.span>
                   )}
                 </AnimatePresence>
               </button>
             </TooltipTrigger>
-            {collapsed && <TooltipContent side="right"><p>Logout</p></TooltipContent>}
+            {collapsed && <TooltipContent side="right"><p>{t("auth.logout")}</p></TooltipContent>}
           </Tooltip>
         </div>
 

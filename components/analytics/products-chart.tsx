@@ -13,9 +13,8 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BarChart2 } from "lucide-react";
+import { useTranslations } from "@/hooks/use-translations";
 import type { TopSellingProduct } from "@/types";
-
-// ─── Custom tooltip ───────────────────────────────────────────────────────────
 
 function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
   if (!active || !payload?.length) return null;
@@ -33,17 +32,13 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
   );
 }
 
-// ─── Props ────────────────────────────────────────────────────────────────────
-
 interface ProductsChartProps {
   data: TopSellingProduct[] | undefined;
   isLoading: boolean;
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
-
 export function ProductsChart({ data, isLoading }: ProductsChartProps) {
-  // Limit to top 8 for readability in the chart (full list is in the table)
+  const t = useTranslations();
   const chartData = data?.slice(0, 8).map((p) => ({
     ...p,
     shortName: p.name.length > 14 ? p.name.slice(0, 14) + "…" : p.name,
@@ -54,7 +49,7 @@ export function ProductsChart({ data, isLoading }: ProductsChartProps) {
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-base">
           <BarChart2 className="h-4 w-4 text-primary" />
-          Top Products by Revenue
+          {t("analytics.productsChart")}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -62,7 +57,7 @@ export function ProductsChart({ data, isLoading }: ProductsChartProps) {
           <Skeleton className="h-[220px] w-full rounded-lg" />
         ) : !chartData?.length ? (
           <div className="flex h-[220px] items-center justify-center text-sm text-muted-foreground">
-            No product data for this period
+            {t("analytics.noProductData")}
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={220}>

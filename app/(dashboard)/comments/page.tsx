@@ -18,6 +18,7 @@ import { commentsService } from "@/services/comments.service";
 import { productsService } from "@/services/products.service";
 import { formatDate, getInitials } from "@/lib/utils";
 import { useDebounce } from "@/hooks/use-debounce";
+import { useTranslations } from "@/hooks/use-translations";
 import { toast } from "sonner";
 import type { Comment } from "@/types";
 
@@ -39,6 +40,7 @@ function StarRating({ rating }: { rating: number }) {
 }
 
 export default function CommentsPage() {
+  const t = useTranslations();
   const [productSearch, setProductSearch] = useState("");
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
   const [page, setPage] = useState(0);
@@ -105,14 +107,13 @@ export default function CommentsPage() {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
-      <PageHeader title="Reviews" description="Manage product reviews and ratings" />
+      <PageHeader title={t("reviews.title")} description={t("reviews.subtitle")} />
 
-      {/* Product Selector */}
       <Card className="p-4">
         <div className="space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-sm font-medium">
-              {selectedProductId ? "Showing reviews for selected product" : "Latest reviews are shown by default"}
+              {selectedProductId ? t("reviews.selectProduct") : t("reviews.latestByDefault")}
             </p>
             {selectedProductId && (
               <Button
@@ -124,14 +125,14 @@ export default function CommentsPage() {
                   setPage(0);
                 }}
               >
-                Show latest reviews
+                {t("reviews.showLatest")}
               </Button>
             )}
           </div>
           <div className="relative max-w-sm">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search products..."
+              placeholder={t("products.search")}
               value={productSearch}
               onChange={(e) => setProductSearch(e.target.value)}
               className="pl-8"
@@ -157,17 +158,16 @@ export default function CommentsPage() {
         </div>
       </Card>
 
-      {/* Comments Table */}
       <Card>
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>User</TableHead>
-                {!selectedProductId && <TableHead>Product</TableHead>}
-                <TableHead>Rating</TableHead>
-                <TableHead>Review</TableHead>
-                <TableHead className="hidden md:table-cell">Date</TableHead>
+                <TableHead>{t("reviews.user")}</TableHead>
+                {!selectedProductId && <TableHead>{t("reviews.product")}</TableHead>}
+                <TableHead>{t("reviews.rating")}</TableHead>
+                <TableHead>{t("reviews.review")}</TableHead>
+                <TableHead className="hidden md:table-cell">{t("common.date")}</TableHead>
                 <TableHead className="w-16" />
               </TableRow>
             </TableHeader>
@@ -183,7 +183,7 @@ export default function CommentsPage() {
                 : !activeCommentsData?.content.length ? (
                     <TableRow>
                       <TableCell colSpan={selectedProductId ? 5 : 6} className="text-center text-muted-foreground py-12">
-                        {selectedProductId ? "No reviews for this product" : "No recent reviews found"}
+                        {selectedProductId ? t("reviews.noReviews") : t("reviews.noRecentReviews")}
                       </TableCell>
                     </TableRow>
                   )
@@ -254,9 +254,9 @@ export default function CommentsPage() {
       <ConfirmDialog
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title="Delete Review"
-        description="Delete this review permanently? This cannot be undone."
-        confirmLabel="Delete"
+        title={t("reviews.title")}
+        description={t("reviews.confirmDelete")}
+        confirmLabel={t("common.delete")}
         onConfirm={async () => {
           if (deleteTarget) await deleteComment.mutateAsync(deleteTarget.id);
           setDeleteTarget(null);

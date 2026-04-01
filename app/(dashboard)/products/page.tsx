@@ -39,27 +39,19 @@ import { formatCurrency, img } from "@/lib/utils";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useQueryClient } from "@tanstack/react-query";
 import { productKeys } from "@/hooks/use-products";
+import { useTranslations } from "@/hooks/use-translations";
 import type { Product, ProductRequest, ProductSortOption } from "@/types";
 
 const formatNumberWithSpacing = (value: string): string => {
-  // Remove existing spaces and non-digit characters except decimal point
   const cleanValue = value.replace(/\s/g, '');
-  
-  // If empty, return empty
   if (!cleanValue) return '';
-  
-  // Convert to number and back to string to remove leading zeros
   const numValue = parseFloat(cleanValue);
   if (isNaN(numValue)) return '';
-  
   const numStr = numValue.toString();
-  
-  // Add space after every 3 digits from the right (standard number formatting)
   return numStr.replace(/\B(?=(\d{3})+(?!\d))/g, ' ').trim();
 };
 
 const parseFormattedNumber = (formattedValue: string): number => {
-  // Remove spaces and convert to number
   return parseFloat(formattedValue.replace(/\s/g, '')) || 0;
 };
 
@@ -77,6 +69,7 @@ const productSchema = z.object({
 type ProductFormData = z.infer<typeof productSchema>;
 
 export default function ProductsPage() {
+  const t = useTranslations();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(20);
@@ -92,7 +85,6 @@ export default function ProductsPage() {
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [imageUploadProduct, setImageUploadProduct] = useState<Product | null>(null);
 
-  // State for formatted input values
   const [formattedSellPrice, setFormattedSellPrice] = useState("");
   const [formattedArrivalPrice, setFormattedArrivalPrice] = useState("");
   const [formattedStockQuantity, setFormattedStockQuantity] = useState("");
@@ -110,6 +102,12 @@ export default function ProductsPage() {
   });
   const { data: categoriesData } = useCategories({ size: 100 });
   const { data: companiesData } = useCompanies({ size: 100 });
+  const categories = (categoriesData?.content ?? []).filter(
+    (category): category is NonNullable<typeof category> => category != null
+  );
+  const companies = (companiesData?.content ?? []).filter(
+    (company): company is NonNullable<typeof company> => company != null
+  );
 
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
@@ -128,8 +126,6 @@ export default function ProductsPage() {
       if (field === "discount") return prev === "DISCOUNT_ASC" ? "DISCOUNT_DESC" : "DISCOUNT_ASC";
       if (field === "stock") return prev === "STOCK_ASC" ? "STOCK_DESC" : "STOCK_ASC";
       if (field === "sold") return prev === "SOLD_ASC" ? "SOLD_DESC" : "SOLD_ASC";
-
-      // price
       if (prev === "PRICE_ASC") return "PRICE_DESC";
       return "PRICE_ASC";
     });
@@ -151,7 +147,6 @@ export default function ProductsPage() {
     if (field === "discount") return sort === "DISCOUNT_DESC";
     if (field === "stock") return sort === "STOCK_DESC";
     if (field === "sold") return sort === "SOLD_DESC";
-    // POPULAR is DESC
     return true;
   };
 
@@ -162,7 +157,7 @@ export default function ProductsPage() {
     setValue,
     watch,
     formState: { errors, isSubmitting },
-  } = useForm<ProductFormData>({ resolver: zodResolver(productSchema) as any });
+  } = useForm<ProductFormData>({ resolver: zodResolver(productSchema) });
 
   const openCreate = () => {
     setEditingProduct(null);
@@ -181,8 +176,8 @@ export default function ProductsPage() {
       description: product.description,
       discountPercent: product.discountPercent,
       stockQuantity: product.stockQuantity,
-      categoryId: product.category.id,
-      companyId: product.company.id,
+      categoryId: product.category?.id ?? 0,
+      companyId: product.company?.id ?? 0,
       arrivalPrice: product.arrivalPrice,
       sellPrice: product.sellPrice,
     });
@@ -217,10 +212,10 @@ export default function ProductsPage() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
-      <PageHeader title="Products" description={`${data?.totalElements ?? "..."} products`}>
+      <PageHeader title={t("products.title")} description={t("products.subtitle", { count: data?.totalElements ?? "..." })}>
         <Button size="sm" onClick={openCreate}>
           <Plus className="h-4 w-4" />
-          Add Product
+          {t("products.addProduct")}
         </Button>
       </PageHeader>
 
@@ -229,7 +224,7 @@ export default function ProductsPage() {
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search products..."
+              placeholder={t("products.search")}
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(0); }}
               className="pl-8"
@@ -244,11 +239,11 @@ export default function ProductsPage() {
             }}
           >
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Category" />
+              <SelectValue placeholder={t("products.category")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ALL">All categories</SelectItem>
-              {categoriesData?.content.map((c) => (
+              <SelectItem value="ALL">{t("products.category")} — {t("common.noData").toLowerCase()}</SelectItem>
+              {categories.map((c) => (
                 <SelectItem key={c.id} value={String(c.id)}>
                   {c.name}
                 </SelectItem>
@@ -264,11 +259,11 @@ export default function ProductsPage() {
             }}
           >
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Company" />
+              <SelectValue placeholder={t("products.company")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ALL">All companies</SelectItem>
-              {companiesData?.content.map((c) => (
+              <SelectItem value="ALL">{t("products.company")} — {t("common.noData").toLowerCase()}</SelectItem>
+              {companies.map((c) => (
                 <SelectItem key={c.id} value={String(c.id)}>
                   {c.name}
                 </SelectItem>
@@ -315,14 +310,14 @@ export default function ProductsPage() {
                     )}
                   </button>
                 </TableHead>
-                <TableHead>Product</TableHead>
-                <TableHead className="hidden sm:table-cell">Category</TableHead>
+                <TableHead>{t("products.title")}</TableHead>
+                <TableHead className="hidden sm:table-cell">{t("products.category")}</TableHead>
                 <TableHead>
                   <button
                     onClick={() => handleSort("price")}
                     className="flex items-center gap-1 hover:text-primary transition-colors"
                   >
-                    Price
+                    {t("products.price")}
                     {isSortActive("price") && (
                       <ChevronUp className={`h-4 w-4 transition-transform ${isSortDesc("price") ? "rotate-180" : ""}`} />
                     )}
@@ -333,7 +328,7 @@ export default function ProductsPage() {
                     onClick={() => handleSort("discount")}
                     className="flex items-center gap-1 hover:text-primary transition-colors"
                   >
-                    Discount
+                    {t("products.discount")}
                     {isSortActive("discount") && (
                       <ChevronUp className={`h-4 w-4 transition-transform ${isSortDesc("discount") ? "rotate-180" : ""}`} />
                     )}
@@ -344,7 +339,7 @@ export default function ProductsPage() {
                     onClick={() => handleSort("stock")}
                     className="flex items-center gap-1 hover:text-primary transition-colors"
                   >
-                    Stock
+                    {t("products.stock")}
                     {isSortActive("stock") && (
                       <ChevronUp className={`h-4 w-4 transition-transform ${isSortDesc("stock") ? "rotate-180" : ""}`} />
                     )}
@@ -355,13 +350,13 @@ export default function ProductsPage() {
                     onClick={() => handleSort("sold")}
                     className="flex items-center gap-1 hover:text-primary transition-colors"
                   >
-                    Sold
+                    {t("products.sold")}
                     {isSortActive("sold") && (
                       <ChevronUp className={`h-4 w-4 transition-transform ${isSortDesc("sold") ? "rotate-180" : ""}`} />
                     )}
                   </button>
                 </TableHead>
-                <TableHead className="hidden lg:table-cell">Rating</TableHead>
+                <TableHead className="hidden lg:table-cell">{t("reviews.rating")}</TableHead>
                 <TableHead className="w-10" />
               </TableRow>
             </TableHeader>
@@ -377,6 +372,8 @@ export default function ProductsPage() {
                 : data?.content.map((product, i) => {
                     const mainImage = product.images?.find((img) => img.isMain) ?? product.images?.[0];
                     const mainImageUrl = img(mainImage?.imageUrl ?? mainImage?.imageLink);
+                    const companyName = product.company?.name ?? "—";
+                    const categoryName = product.category?.name ?? "—";
                     return (
                       <motion.tr
                         key={product.id}
@@ -407,12 +404,12 @@ export default function ProductsPage() {
                             </div>
                             <div className="min-w-0">
                               <p className="font-medium text-sm truncate max-w-[200px]">{product.name}</p>
-                              <p className="text-xs text-muted-foreground">{product.company.name}</p>
+                              <p className="text-xs text-muted-foreground">{companyName}</p>
                             </div>
                           </div>
                         </TableCell>
                         <TableCell className="hidden sm:table-cell">
-                          <Badge variant="secondary">{product.category.name}</Badge>
+                          <Badge variant="secondary">{categoryName}</Badge>
                         </TableCell>
                         <TableCell>
                           <div>
@@ -459,18 +456,18 @@ export default function ProductsPage() {
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem onClick={() => openEdit(product)}>
                                 <Pencil className="h-4 w-4" />
-                                Edit
+                                {t("common.edit")}
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => setImageUploadProduct(product)}>
                                 <ImagePlus className="h-4 w-4" />
-                                Upload Images
+                                {t("products.uploadImages")}
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 className="text-destructive focus:text-destructive"
                                 onClick={() => setDeleteTarget(product)}
                               >
                                 <Trash2 className="h-4 w-4" />
-                                Delete
+                                {t("common.delete")}
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -500,34 +497,34 @@ export default function ProductsPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingProduct ? "Edit Product" : "Add Product"}</DialogTitle>
+            <DialogTitle>{editingProduct ? t("products.editProduct") : t("products.addProduct")}</DialogTitle>
           </DialogHeader>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2 space-y-1.5">
-                <Label htmlFor="name">Name</Label>
+                <Label htmlFor="name">{t("common.name")}</Label>
                 <Input id="name" {...register("name")} />
                 {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
               </div>
 
               <div className="col-span-2 space-y-1.5">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">{t("products.description")}</Label>
                 <Input id="description" {...register("description")} />
                 {errors.description && <p className="text-xs text-destructive">{errors.description.message}</p>}
               </div>
 
               <div className="space-y-1.5">
-                <Label>Category</Label>
+                <Label>{t("products.category")}</Label>
                 <Select
                   value={String(watch("categoryId") || "")}
                   onValueChange={(v) => setValue("categoryId", Number(v), { shouldValidate: true })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
+                    <SelectValue placeholder={t("products.category")} />
                   </SelectTrigger>
                   <SelectContent>
-                    {categoriesData?.content.map((c) => (
+                    {categories.map((c) => (
                       <SelectItem key={c.id} value={String(c.id)}>
                         {c.name}
                       </SelectItem>
@@ -538,16 +535,16 @@ export default function ProductsPage() {
               </div>
 
               <div className="space-y-1.5">
-                <Label>Company</Label>
+                <Label>{t("products.company")}</Label>
                 <Select
                   value={String(watch("companyId") || "")}
                   onValueChange={(v) => setValue("companyId", Number(v), { shouldValidate: true })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select company" />
+                    <SelectValue placeholder={t("products.company")} />
                   </SelectTrigger>
                   <SelectContent>
-                    {companiesData?.content.map((c) => (
+                    {companies.map((c) => (
                       <SelectItem key={c.id} value={String(c.id)}>
                         {c.name}
                       </SelectItem>
@@ -558,10 +555,10 @@ export default function ProductsPage() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="sellPrice">Sell Price</Label>
-                <Input 
-                  id="sellPrice" 
-                  type="text" 
+                <Label htmlFor="sellPrice">{t("products.price")}</Label>
+                <Input
+                  id="sellPrice"
+                  type="text"
                   value={formattedSellPrice}
                   onChange={(e) => {
                     const formatted = formatNumberWithSpacing(e.target.value);
@@ -573,10 +570,10 @@ export default function ProductsPage() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="arrivalPrice">Arrival Price</Label>
-                <Input 
-                  id="arrivalPrice" 
-                  type="text" 
+                <Label htmlFor="arrivalPrice">{t("products.arrivalPrice")}</Label>
+                <Input
+                  id="arrivalPrice"
+                  type="text"
                   value={formattedArrivalPrice}
                   onChange={(e) => {
                     const formatted = formatNumberWithSpacing(e.target.value);
@@ -587,10 +584,10 @@ export default function ProductsPage() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="stockQuantity">Stock</Label>
-                <Input 
-                  id="stockQuantity" 
-                  type="text" 
+                <Label htmlFor="stockQuantity">{t("products.stock")}</Label>
+                <Input
+                  id="stockQuantity"
+                  type="text"
                   value={formattedStockQuantity}
                   onChange={(e) => {
                     const formatted = formatNumberWithSpacing(e.target.value);
@@ -601,10 +598,10 @@ export default function ProductsPage() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="discountPercent">Discount %</Label>
-                <Input 
-                  id="discountPercent" 
-                  type="text" 
+                <Label htmlFor="discountPercent">{t("products.discount")}</Label>
+                <Input
+                  id="discountPercent"
+                  type="text"
                   value={formattedDiscountPercent}
                   onChange={(e) => {
                     const formatted = formatNumberWithSpacing(e.target.value);
@@ -617,10 +614,10 @@ export default function ProductsPage() {
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-                Cancel
+                {t("common.cancel")}
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Saving..." : editingProduct ? "Save Changes" : "Create Product"}
+                {isSubmitting ? t("common.loading") : editingProduct ? t("common.save") : t("common.create")}
               </Button>
             </DialogFooter>
           </form>
@@ -631,11 +628,11 @@ export default function ProductsPage() {
       <Dialog open={!!imageUploadProduct} onOpenChange={(open) => !open && setImageUploadProduct(null)}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Upload Images — {imageUploadProduct?.name}</DialogTitle>
+            <DialogTitle>{t("products.uploadImages")} — {imageUploadProduct?.name}</DialogTitle>
           </DialogHeader>
           {imageUploadProduct && (
-            <ProductImageUpload 
-              productId={imageUploadProduct.id} 
+            <ProductImageUpload
+              productId={imageUploadProduct.id}
               onUploadComplete={handleImageUploadComplete}
             />
           )}
@@ -646,9 +643,9 @@ export default function ProductsPage() {
       <ConfirmDialog
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title="Delete Product"
-        description={`Delete "${deleteTarget?.name}"? This action cannot be undone.`}
-        confirmLabel="Delete"
+        title={t("products.title")}
+        description={t("products.confirmDelete")}
+        confirmLabel={t("common.delete")}
         onConfirm={async () => {
           if (deleteTarget) await deleteProduct.mutateAsync(deleteTarget.id);
           setDeleteTarget(null);

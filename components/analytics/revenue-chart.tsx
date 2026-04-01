@@ -13,9 +13,8 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TrendingUp } from "lucide-react";
+import { useTranslations } from "@/hooks/use-translations";
 import type { RevenueChartPoint } from "@/types";
-
-// ─── Custom tooltip ───────────────────────────────────────────────────────────
 
 function CustomTooltip({ active, payload, label }: TooltipProps<number, string>) {
   if (!active || !payload?.length) return null;
@@ -29,22 +28,20 @@ function CustomTooltip({ active, payload, label }: TooltipProps<number, string>)
   );
 }
 
-// ─── Props ────────────────────────────────────────────────────────────────────
-
 interface RevenueChartProps {
   data: RevenueChartPoint[] | undefined;
   isLoading: boolean;
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
-
 export function RevenueChart({ data, isLoading }: RevenueChartProps) {
+  const t = useTranslations();
+
   return (
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-base">
           <TrendingUp className="h-4 w-4 text-primary" />
-          Revenue Over Time
+          {t("analytics.revenueChart")}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -52,7 +49,7 @@ export function RevenueChart({ data, isLoading }: RevenueChartProps) {
           <Skeleton className="h-[220px] w-full rounded-lg" />
         ) : !data?.length ? (
           <div className="flex h-[220px] items-center justify-center text-sm text-muted-foreground">
-            No chart data available for this period
+            {t("analytics.noChartData")}
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={220}>

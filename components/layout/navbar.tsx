@@ -20,12 +20,15 @@ import { getInitials } from "@/lib/utils";
 import { authService } from "@/services/auth.service";
 import { tokenStorage } from "@/lib/api";
 import { useRouter } from "next/navigation";
+import { LanguageSwitcher } from "@/components/layout/language-switcher";
+import { useTranslations } from "@/hooks/use-translations";
 
 interface NavbarProps {
   onMobileMenuToggle?: () => void;
 }
 
 export function Navbar({ onMobileMenuToggle }: NavbarProps) {
+  const t = useTranslations();
   const { theme, setTheme } = useTheme();
   const { user, clearAuth } = useAuthStore();
   const router = useRouter();
@@ -52,6 +55,9 @@ export function Navbar({ onMobileMenuToggle }: NavbarProps) {
       </Button>
 
       <div className="ml-auto flex items-center gap-2">
+        {/* Language Switcher */}
+        <LanguageSwitcher />
+
         {/* Theme Toggle */}
         <Button
           variant="ghost"
@@ -103,14 +109,14 @@ export function Navbar({ onMobileMenuToggle }: NavbarProps) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href="/notifications">Notifications</Link>
+              <Link href="/notifications">{t("nav.notifications")}</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="text-destructive focus:text-destructive"
               onClick={handleLogout}
             >
-              Log out
+              {t("auth.logout")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

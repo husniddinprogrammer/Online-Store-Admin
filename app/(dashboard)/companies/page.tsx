@@ -26,6 +26,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCompanies, useCreateCompany, useUpdateCompany, useDeleteCompany } from "@/hooks/use-companies";
 import { img } from "@/lib/utils";
+import { useTranslations } from "@/hooks/use-translations";
 import type { Company } from "@/types";
 
 const companySchema = z.object({
@@ -34,12 +35,12 @@ const companySchema = z.object({
 type CompanyFormData = z.infer<typeof companySchema>;
 
 export default function CompaniesPage() {
+  const t = useTranslations();
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(20);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<Company | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Company | null>(null);
-  // Image is optional for companies — no imageError needed
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   const { data, isLoading } = useCompanies({ page, size: pageSize });
@@ -76,10 +77,10 @@ export default function CompaniesPage() {
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
-      <PageHeader title="Companies" description={`${data?.totalElements ?? "..."} companies`}>
+      <PageHeader title={t("companies.title")} description={t("companies.subtitle", { count: data?.totalElements ?? "..." })}>
         <Button size="sm" onClick={openCreate}>
           <Plus className="h-4 w-4" />
-          Add Company
+          {t("companies.addCompany")}
         </Button>
       </PageHeader>
 
@@ -88,9 +89,9 @@ export default function CompaniesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-16">Logo</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead className="w-24">Actions</TableHead>
+                <TableHead className="w-16">{t("companies.logo")}</TableHead>
+                <TableHead>{t("common.name")}</TableHead>
+                <TableHead className="w-24">{t("common.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -157,23 +158,22 @@ export default function CompaniesPage() {
         )}
       </Card>
 
-      {/* Create / Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle>{editingItem ? "Edit Company" : "Add Company"}</DialogTitle>
+            <DialogTitle>{editingItem ? t("companies.editCompany") : t("companies.addCompany")}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="co-name">Name</Label>
+              <Label htmlFor="co-name">{t("common.name")}</Label>
               <Input id="co-name" {...register("name")} />
               {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
             </div>
 
             <div className="space-y-1.5">
               <Label>
-                Logo
-                <span className="ml-1 text-xs text-muted-foreground">(optional)</span>
+                {t("companies.logo")}
+                <span className="ml-1 text-xs text-muted-foreground">({t("common.optional")})</span>
               </Label>
               <ImagePicker
                 value={imageFile}
@@ -183,22 +183,21 @@ export default function CompaniesPage() {
             </div>
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>{t("common.cancel")}</Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Saving..." : editingItem ? "Save" : "Create"}
+                {isSubmitting ? t("common.loading") : editingItem ? t("common.save") : t("common.create")}
               </Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirm */}
       <ConfirmDialog
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title="Delete Company"
-        description={`Delete "${deleteTarget?.name}"? This cannot be undone.`}
-        confirmLabel="Delete"
+        title={t("companies.title")}
+        description={t("companies.confirmDelete", { name: deleteTarget?.name ?? "" })}
+        confirmLabel={t("common.delete")}
         onConfirm={async () => {
           if (deleteTarget) await deleteCompany.mutateAsync(deleteTarget.id);
           setDeleteTarget(null);

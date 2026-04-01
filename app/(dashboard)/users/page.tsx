@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,6 +29,7 @@ import {
   useDeleteUser,
 } from "@/hooks/use-users";
 import { getInitials, formatDate } from "@/lib/utils";
+import { useTranslations } from "@/hooks/use-translations";
 import type { User, UserRole } from "@/types";
 import { useDebounce } from "@/hooks/use-debounce";
 
@@ -41,6 +41,7 @@ const roleBadgeVariant: Record<UserRole, "default" | "secondary" | "destructive"
 };
 
 export default function UsersPage() {
+  const t = useTranslations();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(20);
@@ -81,20 +82,19 @@ export default function UsersPage() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
-      <PageHeader title="Users" description={`${data?.totalElements ?? "..."} total users`}>
+      <PageHeader title={t("users.title")} description={t("users.subtitle", { count: data?.totalElements ?? "..." })}>
         <Button size="sm" disabled>
           <UserPlus className="h-4 w-4" />
-          Add User
+          {t("common.add")}
         </Button>
       </PageHeader>
 
       <Card>
-        {/* Toolbar */}
         <div className="flex flex-col sm:flex-row gap-3 p-4 border-b border-border">
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by name or email..."
+              placeholder={t("users.search")}
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
               className="pl-8"
@@ -102,17 +102,16 @@ export default function UsersPage() {
           </div>
         </div>
 
-        {/* Table */}
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>User</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Balance</TableHead>
-                <TableHead className="hidden md:table-cell">Phone</TableHead>
-                <TableHead className="hidden lg:table-cell">Joined</TableHead>
+                <TableHead>{t("users.name")}</TableHead>
+                <TableHead>{t("users.role")}</TableHead>
+                <TableHead>{t("users.status")}</TableHead>
+                <TableHead>{t("users.balance")}</TableHead>
+                <TableHead className="hidden md:table-cell">{t("users.phone")}</TableHead>
+                <TableHead className="hidden lg:table-cell">{t("common.date")}</TableHead>
                 <TableHead className="w-10" />
               </TableRow>
             </TableHeader>
@@ -159,7 +158,7 @@ export default function UsersPage() {
                       </TableCell>
                       <TableCell>
                         <Badge variant={user.blocked ? "destructive" : "success"}>
-                          {user.blocked ? "Blocked" : "Active"}
+                          {user.blocked ? t("users.blocked") : t("users.active")}
                         </Badge>
                       </TableCell>
                       <TableCell className="font-mono text-sm">
@@ -179,12 +178,11 @@ export default function UsersPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-48">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuLabel>{t("common.actions")}</DropdownMenuLabel>
                             <DropdownMenuSeparator />
 
-                            {/* Role Change */}
                             <DropdownMenuLabel className="text-xs font-normal text-muted-foreground pt-1">
-                              Change role
+                              {t("users.changeRole")}
                             </DropdownMenuLabel>
                             {(["CUSTOMER", "DELIVERY", "ADMIN", "SUPER_ADMIN"] as UserRole[]).map((role) => (
                               <DropdownMenuItem
@@ -203,7 +201,7 @@ export default function UsersPage() {
                             {user.blocked ? (
                               <DropdownMenuItem onClick={() => setConfirmAction({ type: "unblock", user })}>
                                 <UserCheck className="h-4 w-4" />
-                                Unblock
+                                {t("users.unblock")}
                               </DropdownMenuItem>
                             ) : (
                               <DropdownMenuItem
@@ -211,7 +209,7 @@ export default function UsersPage() {
                                 onClick={() => setConfirmAction({ type: "block", user })}
                               >
                                 <Ban className="h-4 w-4" />
-                                Block
+                                {t("users.block")}
                               </DropdownMenuItem>
                             )}
 
@@ -220,7 +218,7 @@ export default function UsersPage() {
                               onClick={() => setConfirmAction({ type: "delete", user })}
                             >
                               <Trash2 className="h-4 w-4" />
-                              Delete
+                              {t("users.deleteUser")}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -231,7 +229,6 @@ export default function UsersPage() {
           </Table>
         </div>
 
-        {/* Pagination */}
         {data && (
           <div className="p-4">
             <DataTablePagination
@@ -246,26 +243,25 @@ export default function UsersPage() {
         )}
       </Card>
 
-      {/* Confirm Dialog */}
       <ConfirmDialog
         open={!!confirmAction}
         onOpenChange={(open) => !open && setConfirmAction(null)}
         title={
           confirmAction?.type === "block"
-            ? "Block User"
+            ? t("users.block")
             : confirmAction?.type === "unblock"
-            ? "Unblock User"
-            : "Delete User"
+            ? t("users.unblock")
+            : t("users.deleteUser")
         }
         description={
           confirmAction?.type === "block"
-            ? `Block ${confirmAction.user.name}? They won't be able to access the platform.`
+            ? `${t("users.block")} ${confirmAction.user.name}?`
             : confirmAction?.type === "unblock"
-            ? `Unblock ${confirmAction?.user.name}? They will regain access.`
-            : `Permanently delete ${confirmAction?.user.name}? This cannot be undone.`
+            ? `${t("users.unblock")} ${confirmAction?.user.name}?`
+            : t("users.confirmDelete")
         }
         confirmLabel={
-          confirmAction?.type === "block" ? "Block" : confirmAction?.type === "unblock" ? "Unblock" : "Delete"
+          confirmAction?.type === "block" ? t("users.block") : confirmAction?.type === "unblock" ? t("users.unblock") : t("common.delete")
         }
         variant={confirmAction?.type === "unblock" ? "default" : "destructive"}
         onConfirm={handleConfirm}
