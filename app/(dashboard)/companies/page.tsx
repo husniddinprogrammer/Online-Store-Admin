@@ -25,6 +25,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCompanies, useCreateCompany, useUpdateCompany, useDeleteCompany } from "@/hooks/use-companies";
+import { img } from "@/lib/utils";
 import type { Company } from "@/types";
 
 const companySchema = z.object({
@@ -112,7 +113,7 @@ export default function CompaniesPage() {
                       <TableCell>
                         <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-muted border border-border">
                           {item.imageLink ? (
-                            <Image src={item.imageLink} alt={item.name} fill className="object-cover" sizes="40px" />
+                            <Image src={img(item.imageLink)!} alt={item.name} fill className="object-cover" sizes="40px" />
                           ) : (
                             <div className="flex items-center justify-center h-full">
                               <Building2 className="h-4 w-4 text-muted-foreground" />
@@ -177,7 +178,7 @@ export default function CompaniesPage() {
               <ImagePicker
                 value={imageFile}
                 onChange={setImageFile}
-                existingUrl={editingItem?.imageLink}
+                existingUrl={img(editingItem?.imageLink) ?? undefined}
               />
             </div>
 

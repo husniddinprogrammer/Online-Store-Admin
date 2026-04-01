@@ -18,6 +18,7 @@ import {
   ChevronRight,
   Store,
   LogOut,
+  Send,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,6 @@ import { authService } from "@/services/auth.service";
 import { tokenStorage } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { toast } from "sonner";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -42,6 +42,8 @@ const navItems = [
   { href: "/posters", label: "Posters", icon: Image },
   { href: "/analytics", label: "Analytics", icon: BarChart2 },
 ];
+
+const telegramLink = "https://t.me/mahmudovhusniddin";
 
 interface SidebarProps {
   collapsed: boolean;
@@ -164,8 +166,39 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
         <Separator className="bg-sidebar-border" />
 
-        {/* Logout */}
-        <div className="p-2">
+        {/* Footer actions */}
+        <div className="p-2 space-y-1">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <a
+                href={telegramLink}
+                target="_blank"
+                rel="noreferrer"
+                className={cn(
+                  "flex items-center gap-3 w-full px-2 py-2 rounded-lg text-sm font-medium transition-all duration-150",
+                  "text-sidebar-muted hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
+                )}
+                aria-label="Open Telegram"
+              >
+                <Send className="shrink-0 w-4 h-4" />
+                <AnimatePresence>
+                  {!collapsed && (
+                    <motion.span
+                      initial={{ opacity: 0, width: 0 }}
+                      animate={{ opacity: 1, width: "auto" }}
+                      exit={{ opacity: 0, width: 0 }}
+                      transition={{ duration: 0.15 }}
+                      className="whitespace-nowrap overflow-hidden"
+                    >
+                      Telegram
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </a>
+            </TooltipTrigger>
+            {collapsed && <TooltipContent side="right"><p>Telegram</p></TooltipContent>}
+          </Tooltip>
+
           <Tooltip>
             <TooltipTrigger asChild>
               <button

@@ -19,6 +19,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { usePosters, useCreatePoster, useUpdatePoster, useDeletePoster } from "@/hooks/use-posters";
+import { img } from "@/lib/utils";
 import type { Poster } from "@/types";
 
 export default function PostersPage() {
@@ -78,7 +79,7 @@ export default function PostersPage() {
                   <div className="relative w-full bg-muted" style={{ paddingBottom: "56.25%" }}>
                     {poster.imageLink ? (
                       <Image
-                        src={poster.imageLink}
+                        src={img(poster.imageLink)!}
                         alt={`Poster ${poster.id}`}
                         fill
                         className="object-cover"
@@ -188,7 +189,7 @@ export default function PostersPage() {
           {replaceTarget && (
             <PosterUpload
               imageOnly
-              existingUrl={replaceTarget.imageLink}
+              existingUrl={img(replaceTarget.imageLink) ?? undefined}
               onSubmit={(image) => handleReplace(image)}
               onCancel={() => setReplaceTarget(null)}
             />

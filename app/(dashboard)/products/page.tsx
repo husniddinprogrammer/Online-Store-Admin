@@ -35,7 +35,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct } from "@/hooks/use-products";
 import { useCategories } from "@/hooks/use-categories";
 import { useCompanies } from "@/hooks/use-companies";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, img } from "@/lib/utils";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useQueryClient } from "@tanstack/react-query";
 import { productKeys } from "@/hooks/use-products";
@@ -376,7 +376,7 @@ export default function ProductsPage() {
                   ))
                 : data?.content.map((product, i) => {
                     const mainImage = product.images?.find((img) => img.isMain) ?? product.images?.[0];
-                    const mainImageUrl = mainImage?.imageUrl ?? mainImage?.imageLink;
+                    const mainImageUrl = img(mainImage?.imageUrl ?? mainImage?.imageLink);
                     return (
                       <motion.tr
                         key={product.id}

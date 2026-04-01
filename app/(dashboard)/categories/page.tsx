@@ -25,6 +25,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCategories, useCreateCategory, useUpdateCategory, useDeleteCategory } from "@/hooks/use-categories";
+import { img } from "@/lib/utils";
 import type { Category } from "@/types";
 
 const categorySchema = z.object({
@@ -121,7 +122,7 @@ export default function CategoriesPage() {
                       <TableCell>
                         <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-muted border border-border">
                           {item.imageLink ? (
-                            <Image src={item.imageLink} alt={item.name} fill className="object-cover" sizes="40px" />
+                            <Image src={img(item.imageLink)!} alt={item.name} fill className="object-cover" sizes="40px" />
                           ) : (
                             <div className="flex items-center justify-center h-full">
                               <Tag className="h-4 w-4 text-muted-foreground" />
@@ -187,7 +188,7 @@ export default function CategoriesPage() {
               <ImagePicker
                 value={imageFile}
                 onChange={(f) => { setImageFile(f); if (f) setImageError(undefined); }}
-                existingUrl={editingItem?.imageLink}
+                existingUrl={img(editingItem?.imageLink) ?? undefined}
                 error={imageError}
               />
             </div>

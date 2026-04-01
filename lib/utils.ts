@@ -1,5 +1,18 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { BASE_URL } from "@/lib/api";
+
+/**
+ * Resolves an image URL returned by the backend.
+ * - Absolute URLs (http/https/data:) → returned as-is
+ * - Relative paths (/uploads/...) → prepended with BASE_URL
+ * - null/undefined → null
+ */
+export function img(url: string | null | undefined): string | null {
+  if (!url) return null;
+  if (url.startsWith("http") || url.startsWith("//") || url.startsWith("data:")) return url;
+  return `${BASE_URL}${url.startsWith("/") ? "" : "/"}${url}`;
+}
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
