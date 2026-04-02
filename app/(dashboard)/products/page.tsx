@@ -40,6 +40,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { useQueryClient } from "@tanstack/react-query";
 import { productKeys } from "@/hooks/use-products";
 import { useTranslations } from "@/hooks/use-translations";
+import { useCanEdit } from "@/hooks/use-can-edit";
 import type { Product, ProductRequest, ProductSortOption } from "@/types";
 
 const formatNumberWithSpacing = (value: string): string => {
@@ -70,6 +71,7 @@ type ProductFormData = z.infer<typeof productSchema>;
 
 export default function ProductsPage() {
   const t = useTranslations();
+  const canEdit = useCanEdit();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(20);
@@ -213,10 +215,12 @@ export default function ProductsPage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       <PageHeader title={t("products.title")} description={t("products.subtitle", { count: data?.totalElements ?? "..." })}>
-        <Button size="sm" onClick={openCreate}>
-          <Plus className="h-4 w-4" />
-          {t("products.addProduct")}
-        </Button>
+        {canEdit && (
+          <Button size="sm" onClick={openCreate}>
+            <Plus className="h-4 w-4" />
+            {t("products.addProduct")}
+          </Button>
+        )}
       </PageHeader>
 
       <Card>
@@ -357,7 +361,7 @@ export default function ProductsPage() {
                   </button>
                 </TableHead>
                 <TableHead className="hidden lg:table-cell">{t("reviews.rating")}</TableHead>
-                <TableHead className="w-10" />
+                {canEdit && <TableHead className="w-10" />}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -446,32 +450,34 @@ export default function ProductsPage() {
                             <span className="text-sm">{product.averageRating?.toFixed(1) ?? "—"}</span>
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon-sm">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => openEdit(product)}>
-                                <Pencil className="h-4 w-4" />
-                                {t("common.edit")}
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => setImageUploadProduct(product)}>
-                                <ImagePlus className="h-4 w-4" />
-                                {t("products.uploadImages")}
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                className="text-destructive focus:text-destructive"
-                                onClick={() => setDeleteTarget(product)}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                                {t("common.delete")}
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
+                        {canEdit && (
+                          <TableCell>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon-sm">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => openEdit(product)}>
+                                  <Pencil className="h-4 w-4" />
+                                  {t("common.edit")}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setImageUploadProduct(product)}>
+                                  <ImagePlus className="h-4 w-4" />
+                                  {t("products.uploadImages")}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className="text-destructive focus:text-destructive"
+                                  onClick={() => setDeleteTarget(product)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                  {t("common.delete")}
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        )}
                       </motion.tr>
                     );
                   })}

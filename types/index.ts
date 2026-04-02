@@ -29,7 +29,7 @@ export interface ApiError {
 
 // ─── Auth ────────────────────────────────────────────────────────────────────
 
-export type UserRole = "SUPER_ADMIN" | "ADMIN" | "DELIVERY" | "CUSTOMER";
+export type UserRole = "SUPER_ADMIN" | "ADMIN" | "DELIVERY" | "CUSTOMER" | "VIEWER";
 
 export interface AuthResponse {
   accessToken: string;

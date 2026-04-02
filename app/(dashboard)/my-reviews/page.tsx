@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMyReviews } from "@/hooks/use-reviews";
 import { formatDate, formatCurrency, img } from "@/lib/utils";
 import { useTranslations } from "@/hooks/use-translations";
+import { useCanEdit } from "@/hooks/use-can-edit";
 import type { NotReviewedProduct } from "@/types";
 
 function ReviewSkeleton() {
@@ -48,6 +49,7 @@ function PendingSkeleton() {
 
 export default function MyReviewsPage() {
   const t = useTranslations();
+  const canEdit = useCanEdit();
   const { data, isLoading } = useMyReviews();
   const [modalProduct, setModalProduct] = useState<NotReviewedProduct | null>(null);
 
@@ -132,14 +134,16 @@ export default function MyReviewsPage() {
                       )}
                     </div>
 
-                    <Button
-                      size="sm"
-                      className="shrink-0 gap-1.5"
-                      onClick={() => setModalProduct(product)}
-                    >
-                      <PenLine className="h-3.5 w-3.5" />
-                      {t("myReviews.writeReview")}
-                    </Button>
+                    {canEdit && (
+                      <Button
+                        size="sm"
+                        className="shrink-0 gap-1.5"
+                        onClick={() => setModalProduct(product)}
+                      >
+                        <PenLine className="h-3.5 w-3.5" />
+                        {t("myReviews.writeReview")}
+                      </Button>
+                    )}
                   </Card>
                 </motion.div>
               ))}

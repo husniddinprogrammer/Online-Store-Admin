@@ -21,10 +21,12 @@ import {
 import { usePosters, useCreatePoster, useUpdatePoster, useDeletePoster } from "@/hooks/use-posters";
 import { img } from "@/lib/utils";
 import { useTranslations } from "@/hooks/use-translations";
+import { useCanEdit } from "@/hooks/use-can-edit";
 import type { Poster } from "@/types";
 
 export default function PostersPage() {
   const t = useTranslations();
+  const canEdit = useCanEdit();
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(12);
 
@@ -51,10 +53,12 @@ export default function PostersPage() {
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       <PageHeader title={t("posters.title")} description={t("posters.subtitle", { count: data?.totalElements ?? "..." })}>
-        <Button size="sm" onClick={() => setCreateOpen(true)}>
-          <Plus className="h-4 w-4" />
-          {t("posters.addPoster")}
-        </Button>
+        {canEdit && (
+          <Button size="sm" onClick={() => setCreateOpen(true)}>
+            <Plus className="h-4 w-4" />
+            {t("posters.addPoster")}
+          </Button>
+        )}
       </PageHeader>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -91,24 +95,26 @@ export default function PostersPage() {
                       </div>
                     )}
 
-                    <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => setReplaceTarget(poster)}
-                      >
-                        <RefreshCw className="h-3.5 w-3.5" />
-                        {t("posters.replaceImage")}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => setDeleteTarget(poster)}
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                        {t("common.delete")}
-                      </Button>
-                    </div>
+                    {canEdit && (
+                      <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => setReplaceTarget(poster)}
+                        >
+                          <RefreshCw className="h-3.5 w-3.5" />
+                          {t("posters.replaceImage")}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => setDeleteTarget(poster)}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                          {t("common.delete")}
+                        </Button>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex items-center justify-between gap-2 px-3 py-2.5">
@@ -146,10 +152,12 @@ export default function PostersPage() {
             <p className="font-medium">{t("posters.noPosters")}</p>
             <p className="text-sm text-muted-foreground mt-0.5">{t("posters.noPostersDesc")}</p>
           </div>
-          <Button size="sm" onClick={() => setCreateOpen(true)}>
-            <Plus className="h-4 w-4" />
-            {t("posters.addPoster")}
-          </Button>
+          {canEdit && (
+            <Button size="sm" onClick={() => setCreateOpen(true)}>
+              <Plus className="h-4 w-4" />
+              {t("posters.addPoster")}
+            </Button>
+          )}
         </Card>
       )}
 

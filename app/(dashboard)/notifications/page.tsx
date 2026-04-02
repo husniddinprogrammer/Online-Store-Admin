@@ -17,6 +17,7 @@ import {
 } from "@/hooks/use-notifications";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "@/hooks/use-translations";
+import { useCanEdit } from "@/hooks/use-can-edit";
 import type { NotificationType } from "@/types";
 
 const typeVariant: Record<NotificationType, "info" | "success" | "warning" | "destructive"> = {
@@ -28,6 +29,7 @@ const typeVariant: Record<NotificationType, "info" | "success" | "warning" | "de
 
 export default function NotificationsPage() {
   const t = useTranslations();
+  const canEdit = useCanEdit();
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(20);
 
@@ -44,7 +46,7 @@ export default function NotificationsPage() {
         title={t("notifications.title")}
         description={unseenCount > 0 ? `${unseenCount} unread` : t("notifications.noNotificationsDesc")}
       >
-        {unseenCount > 0 && (
+        {canEdit && unseenCount > 0 && (
           <Button size="sm" variant="outline" onClick={() => markAllSeen.mutate()} disabled={markAllSeen.isPending}>
             <CheckCheck className="h-4 w-4" />
             {t("notifications.markAllRead")}
@@ -99,29 +101,31 @@ export default function NotificationsPage() {
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-1 shrink-0">
-                    {!notif.isSeen && (
+                  {canEdit && (
+                    <div className="flex items-center gap-1 shrink-0">
+                      {!notif.isSeen && (
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          onClick={() => markSeen.mutate(notif.id)}
+                          disabled={markSeen.isPending}
+                          aria-label="Mark as read"
+                        >
+                          <Check className="h-4 w-4 text-primary" />
+                        </Button>
+                      )}
                       <Button
                         variant="ghost"
                         size="icon-sm"
-                        onClick={() => markSeen.mutate(notif.id)}
-                        disabled={markSeen.isPending}
-                        aria-label="Mark as read"
+                        onClick={() => deleteNotif.mutate(notif.id)}
+                        disabled={deleteNotif.isPending}
+                        aria-label="Delete notification"
+                        className="text-muted-foreground hover:text-destructive"
                       >
-                        <Check className="h-4 w-4 text-primary" />
+                        <Trash2 className="h-4 w-4" />
                       </Button>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      onClick={() => deleteNotif.mutate(notif.id)}
-                      disabled={deleteNotif.isPending}
-                      aria-label="Delete notification"
-                      className="text-muted-foreground hover:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+                    </div>
+                  )}
                 </motion.div>
               ))}
             </div>

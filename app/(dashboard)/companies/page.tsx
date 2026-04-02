@@ -27,6 +27,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useCompanies, useCreateCompany, useUpdateCompany, useDeleteCompany } from "@/hooks/use-companies";
 import { img } from "@/lib/utils";
 import { useTranslations } from "@/hooks/use-translations";
+import { useCanEdit } from "@/hooks/use-can-edit";
 import type { Company } from "@/types";
 
 const companySchema = z.object({
@@ -36,6 +37,7 @@ type CompanyFormData = z.infer<typeof companySchema>;
 
 export default function CompaniesPage() {
   const t = useTranslations();
+  const canEdit = useCanEdit();
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(20);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -78,10 +80,12 @@ export default function CompaniesPage() {
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
       <PageHeader title={t("companies.title")} description={t("companies.subtitle", { count: data?.totalElements ?? "..." })}>
-        <Button size="sm" onClick={openCreate}>
-          <Plus className="h-4 w-4" />
-          {t("companies.addCompany")}
-        </Button>
+        {canEdit && (
+          <Button size="sm" onClick={openCreate}>
+            <Plus className="h-4 w-4" />
+            {t("companies.addCompany")}
+          </Button>
+        )}
       </PageHeader>
 
       <Card>
@@ -91,7 +95,7 @@ export default function CompaniesPage() {
               <TableRow>
                 <TableHead className="w-16">{t("companies.logo")}</TableHead>
                 <TableHead>{t("common.name")}</TableHead>
-                <TableHead className="w-24">{t("common.actions")}</TableHead>
+                {canEdit && <TableHead className="w-24">{t("common.actions")}</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -123,21 +127,23 @@ export default function CompaniesPage() {
                         </div>
                       </TableCell>
                       <TableCell className="font-medium">{item.name}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Button variant="ghost" size="icon-sm" onClick={() => openEdit(item)}>
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            className="text-destructive hover:text-destructive"
-                            onClick={() => setDeleteTarget(item)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
+                      {canEdit && (
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            <Button variant="ghost" size="icon-sm" onClick={() => openEdit(item)}>
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              className="text-destructive hover:text-destructive"
+                              onClick={() => setDeleteTarget(item)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      )}
                     </motion.tr>
                   ))}
             </TableBody>

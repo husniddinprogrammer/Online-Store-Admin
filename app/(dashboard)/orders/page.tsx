@@ -16,6 +16,7 @@ import { Separator } from "@/components/ui/separator";
 import { useOrders, useUpdateOrderStatus } from "@/hooks/use-orders";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { useTranslations } from "@/hooks/use-translations";
+import { useCanEdit } from "@/hooks/use-can-edit";
 import type { OrderStatus, Order } from "@/types";
 
 const NEXT_STATUS: Partial<Record<OrderStatus, OrderStatus>> = {
@@ -26,6 +27,7 @@ const NEXT_STATUS: Partial<Record<OrderStatus, OrderStatus>> = {
 
 function OrderRow({ order }: { order: Order }) {
   const t = useTranslations();
+  const canEdit = useCanEdit();
   const [expanded, setExpanded] = useState(false);
   const updateStatus = useUpdateOrderStatus();
 
@@ -60,7 +62,7 @@ function OrderRow({ order }: { order: Order }) {
           {formatDate(order.createdAt)}
         </TableCell>
         <TableCell onClick={(e) => e.stopPropagation()}>
-          {nextStatus && (
+          {canEdit && nextStatus && (
             <Button
               size="sm"
               variant="outline"
@@ -71,7 +73,7 @@ function OrderRow({ order }: { order: Order }) {
               → {nextStatus}
             </Button>
           )}
-          {order.status === "PENDING" && (
+          {canEdit && order.status === "PENDING" && (
             <Button
               size="sm"
               variant="ghost"

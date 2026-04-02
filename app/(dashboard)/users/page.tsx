@@ -30,6 +30,7 @@ import {
 } from "@/hooks/use-users";
 import { getInitials, formatDate } from "@/lib/utils";
 import { useTranslations } from "@/hooks/use-translations";
+import { useCanEdit } from "@/hooks/use-can-edit";
 import type { User, UserRole } from "@/types";
 import { useDebounce } from "@/hooks/use-debounce";
 
@@ -38,10 +39,12 @@ const roleBadgeVariant: Record<UserRole, "default" | "secondary" | "destructive"
   ADMIN: "info",
   DELIVERY: "warning",
   CUSTOMER: "muted",
+  VIEWER: "secondary",
 };
 
 export default function UsersPage() {
   const t = useTranslations();
+  const canEdit = useCanEdit();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(20);
@@ -112,7 +115,7 @@ export default function UsersPage() {
                 <TableHead>{t("users.balance")}</TableHead>
                 <TableHead className="hidden md:table-cell">{t("users.phone")}</TableHead>
                 <TableHead className="hidden lg:table-cell">{t("common.date")}</TableHead>
-                <TableHead className="w-10" />
+                {canEdit && <TableHead className="w-10" />}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -170,7 +173,7 @@ export default function UsersPage() {
                       <TableCell className="hidden lg:table-cell text-sm text-muted-foreground">
                         {formatDate(user.createdAt)}
                       </TableCell>
-                      <TableCell>
+                      {canEdit && <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon-sm" aria-label="User actions">
@@ -184,7 +187,7 @@ export default function UsersPage() {
                             <DropdownMenuLabel className="text-xs font-normal text-muted-foreground pt-1">
                               {t("users.changeRole")}
                             </DropdownMenuLabel>
-                            {(["CUSTOMER", "DELIVERY", "ADMIN", "SUPER_ADMIN"] as UserRole[]).map((role) => (
+                            {(["CUSTOMER", "DELIVERY", "ADMIN", "SUPER_ADMIN", "VIEWER"] as UserRole[]).map((role) => (
                               <DropdownMenuItem
                                 key={role}
                                 disabled={user.role === role || changeRole.isPending}
@@ -222,7 +225,7 @@ export default function UsersPage() {
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
-                      </TableCell>
+                      </TableCell>}
                     </motion.tr>
                   ))}
             </TableBody>

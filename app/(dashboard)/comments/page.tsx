@@ -19,6 +19,7 @@ import { productsService } from "@/services/products.service";
 import { formatDate, getInitials } from "@/lib/utils";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useTranslations } from "@/hooks/use-translations";
+import { useCanEdit } from "@/hooks/use-can-edit";
 import { toast } from "sonner";
 import type { Comment } from "@/types";
 
@@ -41,6 +42,7 @@ function StarRating({ rating }: { rating: number }) {
 
 export default function CommentsPage() {
   const t = useTranslations();
+  const canEdit = useCanEdit();
   const [productSearch, setProductSearch] = useState("");
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
   const [page, setPage] = useState(0);
@@ -168,7 +170,7 @@ export default function CommentsPage() {
                 <TableHead>{t("reviews.rating")}</TableHead>
                 <TableHead>{t("reviews.review")}</TableHead>
                 <TableHead className="hidden md:table-cell">{t("common.date")}</TableHead>
-                <TableHead className="w-16" />
+                {canEdit && <TableHead className="w-16" />}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -221,16 +223,18 @@ export default function CommentsPage() {
                       <TableCell className="hidden md:table-cell text-xs text-muted-foreground">
                         {formatDate(comment.createdAt)}
                       </TableCell>
-                      <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => setDeleteTarget(comment)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
+                      {canEdit && (
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => setDeleteTarget(comment)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      )}
                     </motion.tr>
                   ))}
             </TableBody>
