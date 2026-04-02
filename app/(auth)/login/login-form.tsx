@@ -40,7 +40,7 @@ export function LoginForm() {
     try {
       const auth = await authService.login(data);
 
-      if (!["SUPER_ADMIN", "ADMIN", "DELIVERY"].includes(auth.role)) {
+      if (!["SUPER_ADMIN", "ADMIN", "DELIVERY", "VIEWER"].includes(auth.role)) {
         toast.error("Access denied. Admin privileges required.");
         return;
       }

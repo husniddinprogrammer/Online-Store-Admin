@@ -20,7 +20,7 @@ import { img } from "@/lib/utils";
 import type { NotReviewedProduct } from "@/types";
 
 const schema = z.object({
-  rating: z.number({ required_error: "Please select a rating" }).min(1, "Please select a rating").max(5),
+  rating: z.number().min(1, "Please select a rating").max(5),
   text: z.string().min(10, "Review must be at least 10 characters"),
 });
 type FormData = z.infer<typeof schema>;
@@ -60,7 +60,7 @@ export function ReviewModal({ product, onClose }: ReviewModalProps) {
 
   return (
     <Dialog open={!!product} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md" aria-describedby={undefined}>
         <DialogHeader>
           <DialogTitle>Write a Review</DialogTitle>
         </DialogHeader>

@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { Search, Plus, MoreHorizontal, Pencil, Trash2, Star, Package, ImagePlus, ChevronUp } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion } from "framer-motion";
@@ -159,7 +159,7 @@ export default function ProductsPage() {
     setValue,
     watch,
     formState: { errors, isSubmitting },
-  } = useForm<ProductFormData>({ resolver: zodResolver(productSchema) });
+  } = useForm<ProductFormData>({ resolver: zodResolver(productSchema) as Resolver<ProductFormData> });
 
   const openCreate = () => {
     setEditingProduct(null);
@@ -501,7 +501,7 @@ export default function ProductsPage() {
 
       {/* Create / Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto" aria-describedby={undefined}>
           <DialogHeader>
             <DialogTitle>{editingProduct ? t("products.editProduct") : t("products.addProduct")}</DialogTitle>
           </DialogHeader>
@@ -632,7 +632,7 @@ export default function ProductsPage() {
 
       {/* Image Upload Dialog */}
       <Dialog open={!!imageUploadProduct} onOpenChange={(open) => !open && setImageUploadProduct(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" aria-describedby={undefined}>
           <DialogHeader>
             <DialogTitle>{t("products.uploadImages")} — {imageUploadProduct?.name}</DialogTitle>
           </DialogHeader>

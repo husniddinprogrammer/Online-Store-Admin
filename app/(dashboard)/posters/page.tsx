@@ -173,7 +173,7 @@ export default function PostersPage() {
       )}
 
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg" aria-describedby={undefined}>
           <DialogHeader>
             <DialogTitle>{t("posters.addPoster")}</DialogTitle>
           </DialogHeader>
@@ -185,7 +185,7 @@ export default function PostersPage() {
       </Dialog>
 
       <Dialog open={!!replaceTarget} onOpenChange={(open) => !open && setReplaceTarget(null)}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg" aria-describedby={undefined}>
           <DialogHeader>
             <DialogTitle>{t("posters.replaceImage")}</DialogTitle>
           </DialogHeader>

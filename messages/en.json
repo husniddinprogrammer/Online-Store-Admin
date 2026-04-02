@@ -217,7 +217,7 @@
     "unitsSold": "Units Sold",
     "revenue": "Revenue",
     "selectDates": "Select both From and To dates to load analytics",
-    "loadError": "Failed to load analytics. Please try again.",
+    "loadError": "Please enter the dates.",
     "topProducts_label": "Top products:",
     "noChartData": "No chart data available for this period",
     "noProductData": "No product data for this period"

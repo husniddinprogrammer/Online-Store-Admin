@@ -200,6 +200,36 @@ export interface Cart {
   totalItems: number;
 }
 
+// ─── Review ──────────────────────────────────────────────────────────────────
+
+export interface Review {
+  id: number;
+  productId: number;
+  productName: string;
+  productImageLink: string;
+  rating: number;
+  text: string;
+  createdAt: string;
+}
+
+export interface NotReviewedProduct {
+  productId: number;
+  productName: string;
+  productImageLink: string;
+  price: number | null;
+}
+
+export interface MyReviewsResponse {
+  reviewed: Review[];
+  notReviewed: NotReviewedProduct[];
+}
+
+export interface CreateReviewRequest {
+  productId: number;
+  rating: number;
+  text: string;
+}
+
 // ─── Comment ─────────────────────────────────────────────────────────────────
 
 export interface Comment {

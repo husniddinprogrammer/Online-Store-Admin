@@ -217,7 +217,7 @@
     "unitsSold": "Sotilgan",
     "revenue": "Daromad",
     "selectDates": "Tahlilni yuklash uchun boshlanish va tugash sanalarini tanlang",
-    "loadError": "Tahlilni yuklashda xatolik. Qayta urinib ko'ring.",
+    "loadError": "Iltimos, sanalarni kiriting.",
     "topProducts_label": "Top mahsulotlar:",
     "noChartData": "Bu davr uchun grafik ma'lumotlari yo'q",
     "noProductData": "Bu davr uchun mahsulot ma'lumotlari yo'q"

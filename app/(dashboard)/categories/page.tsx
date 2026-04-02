@@ -174,7 +174,7 @@ export default function CategoriesPage() {
       </Card>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className="max-w-sm" aria-describedby={undefined}>
           <DialogHeader>
             <DialogTitle>{editingItem ? t("categories.editCategory") : t("categories.addCategory")}</DialogTitle>
           </DialogHeader>
