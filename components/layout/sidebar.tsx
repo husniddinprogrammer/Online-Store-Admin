@@ -14,14 +14,11 @@ import {
   Bell,
   Image,
   BarChart2,
-  ChevronLeft,
-  ChevronRight,
   Store,
   LogOut,
   Send,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
 import { useAuthStore } from "@/store/auth.store";
@@ -45,13 +42,9 @@ const navItemDefs = [
 ];
 
 const telegramLink = "https://t.me/mahmudovhusniddin";
+const collapsed = false;
 
-interface SidebarProps {
-  collapsed: boolean;
-  onToggle: () => void;
-}
-
-export function Sidebar({ collapsed, onToggle }: SidebarProps) {
+export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { clearAuth } = useAuthStore();
@@ -231,17 +224,6 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
             {collapsed && <TooltipContent side="right"><p>{t("auth.logout")}</p></TooltipContent>}
           </Tooltip>
         </div>
-
-        {/* Collapse Toggle */}
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={onToggle}
-          className="absolute -right-3.5 top-[4.5rem] z-10 h-7 w-7 rounded-full border border-sidebar-border bg-sidebar text-sidebar-muted hover:text-sidebar-accent-foreground shadow-sm"
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          {collapsed ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronLeft className="h-3.5 w-3.5" />}
-        </Button>
       </motion.aside>
     </TooltipProvider>
   );

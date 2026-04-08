@@ -1,6 +1,6 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 
-export const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
+export const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://api.online-store-beta.uz";
 
 const TOKEN_KEY = "admin_access_token";
 const REFRESH_KEY = "admin_refresh_token";
